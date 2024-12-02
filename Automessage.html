@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Black Pegasus Invoice Generator</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: auto;
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+      }
+      textarea {
+        width: 100%;
+        height: 150px;
+        margin-bottom: 20px;
+        padding: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px 0;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid #ccc;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: center;
+      }
+      input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        text-align: center;
+      }
+      .total-section {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+      select {
+        padding: 5px;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      .customer-info {
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+      }
+      .customer-info p {
+        margin: 5px 0;
+      }
+      .logo {
+        display: block;
+        margin: 0 auto;
+        width: 400px;
+      }
+      .output {
+        padding: 20px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="invoiceContainer">
+      <h1>Black Pegasus Invoice Generator</h1>
+      <textarea
+        id="orderMessage"
+        placeholder="Paste your order message here..."
+      ></textarea>
+      <button onclick="generateInvoice()">Generate Invoice</button>
+      <button onclick="downloadPDF()">Download as PDF</button>
+      <button onclick="window.print()">Print Invoice</button>
+
+      <div id="output" class="output">
+        <h2></h2>
+        <!-- put logo here -->
+        <img src="/logo.png" alt="Black Pegasus Logo" class="logo" />
+        <div id="invoiceContent"></div>
+      </div>
+    </div>
+
+    <!-- Add jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+
+    <script>
+      let orderID = null;
+      function generateInvoice() {
+        orderID = generateOrderID();
+        const message = document.getElementById("orderMessage").value;
+        if (!message) {
+          alert("Please paste your order message.");
+          return;
+        }
+
+        const outputDiv = document.getElementById("invoiceContent");
+        outputDiv.innerHTML = "";
+
+        const itemPattern =
+          /(\d+)x\s(.*?)\((.*?)\)\s*-\s*(\d+)\s*EGP\s*\[Code:\s*(\w+)\]/g;
+        const items = [];
+        let match;
+
+        while ((match = itemPattern.exec(message)) !== null) {
+          items.push({
+            quantity: parseInt(match[1]),
+            name: match[2].trim(),
+            size: match[3].trim(),
+            unitPrice: parseFloat(match[4]),
+            itemCode: match[5].trim(),
+          });
+        }
+
+        // Customer Info
+        // Define the regex patterns
+        const patterns = {
+          name: /Name:\s*(.*?)\n/,
+          phone: /Phone:\s*(.*?)\n/,
+          address: /Address:\s*(.*?)\n/,
+          city: /City:\s*(.*?)\n/,
+          notes: /Notes:\s*(.*)/,
+        };
+
+        // Function to extract customer information
+        const extractCustomerInfo = (message) => {
+          const customerInfo = {};
+
+          for (const [key, pattern] of Object.entries(patterns)) {
+            const match = message.match(pattern);
+            if (match) {
+              customerInfo[key] = match[1].trim();
+            }
+          }
+
+          return customerInfo;
+        };
+
+        // Extract the customer info
+        const customerInfo = extractCustomerInfo(message);
+
+        let tableHTML =
+          "<table><tr><th>Item Name</th><th>Qty</th><th>Size</th><th>Unit Price (EGP)</th><th>Price (EGP)</th><th>Item Code</th></tr>";
+        items.forEach((item) => {
+          tableHTML += ` 
+                    <tr>
+                        <td>${item.name}</td>
+                        <td><input type="number" value="${
+                          item.quantity
+                        }" oninput="updateTotal()"></td>
+                        <td>${item.size}</td>
+                        <td><input type="number" value="${
+                          item.unitPrice
+                        }" oninput="updateTotal()"></td>
+                        <td class="item-total">${(
+                          item.quantity * item.unitPrice
+                        ).toFixed(2)}</td>
+                        <td>${item.itemCode}</td>
+                    </tr>
+                `;
+        });
+        tableHTML += "</table>";
+
+        const shippingOptions = Array.from(
+          { length: 15 },
+          (_, i) => (i + 1) * 10
+        )
+          .map((fee) => `<option value="${fee}">${fee} EGP</option>`)
+          .join("");
+
+        const deliveryOptions = Array.from({ length: 15 }, (_, i) => i + 1)
+          .map((day) => `<option value="${day}">${day} days</option>`)
+          .join("");
+
+        const totalSectionHTML = `
+                <div class="total-section">
+                    <div>
+                        <label>Shipping Fee: </label>
+                        <select id="shippingFee" onchange="updateTotal()">
+                            ${shippingOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Estimated Delivery: </label>
+                        <select id="deliveryTime">
+                            ${deliveryOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <p><strong>Total Before Shipping:</strong> <span id="totalBefore"></span> EGP</p>
+                        <p><strong>Total After Shipping:</strong> <span id="totalAfter"></span> EGP</p>
+                    </div>
+                </div>
+                <p><strong>Invoice Generated:</strong> ${generateTimestamp()}</p>
+                <p><strong>Order ID:</strong> ${orderID}</p>
+            `;
+
+        const customerInfoHTML = `
+                <div class="customer-info">
+                    <p><strong>Name:</strong> ${customerInfo.name}</p>
+                    <p><strong>Phone:</strong> ${customerInfo.phone}</p>
+                    <p><strong>Address:</strong> ${customerInfo.address}</p>
+                    <p><strong>City:</strong> ${customerInfo.city}</p>
+                    <p><strong>Notes:</strong> ${customerInfo.notes}</p>
+                </div>
+            `;
+
+        outputDiv.innerHTML = customerInfoHTML + tableHTML + totalSectionHTML;
+        updateTotal();
+      }
+
+      function updateTotal() {
+        let totalBefore = 0;
+        document.querySelectorAll("table tr").forEach((row, index) => {
+          if (index === 0) return; // Skip header row
+          const quantity =
+            parseFloat(row.cells[1].querySelector("input").value) || 0;
+          const unitPrice =
+            parseFloat(row.cells[3].querySelector("input").value) || 0;
+          const rowTotal = quantity * unitPrice;
+          row.cells[4].innerText = rowTotal.toFixed(2);
+          totalBefore += rowTotal;
+        });
+
+        const shippingFee =
+          parseFloat(document.getElementById("shippingFee").value) || 0;
+        document.getElementById("totalBefore").innerText =
+          totalBefore.toFixed(2);
+        document.getElementById("totalAfter").innerText = (
+          totalBefore + shippingFee
+        ).toFixed(2);
+      }
+
+      function generateTimestamp() {
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0, 16).replace("T", " ");
+        return dateStr;
+      }
+
+      function generateOrderID() {
+        const timestamp = generateTimestamp().replace(/\D/g, "").slice(0, 12); // YYYYMMDDHHMM
+        const randomDigits = Math.floor(1000 + Math.random() * 9000);
+        return `${timestamp}-${randomDigits}`;
+      }
+
+      function downloadPDF() {
+        const element = document.getElementById("output");
+        const options = {
+          filename: `${orderID}.pdf`,
+          html2canvas: { scale: 2 },
+        };
+
+        html2pdf().from(element).set(options).save();
+      }
+    </script>
+  </body>
+</html>
