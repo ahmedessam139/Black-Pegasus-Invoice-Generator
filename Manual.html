@@ -18,7 +18,9 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         border-radius: 10px;
       }
-      input, textarea, select {
+      input,
+      textarea,
+      select {
         width: 60%;
         padding: 10px;
         margin: 5px 0 5px 0;
@@ -108,7 +110,11 @@
       <!-- Output Area -->
       <div id="output" class="output">
         <h2>Invoice</h2>
-        <img src="https://ahmedessam139.github.io/Black-Pegasus-Invoice-Generator/logo.png" alt="Black Pegasus Logo" class="logo" />
+        <img
+          src="https://ahmedessam139.github.io/Black-Pegasus-Invoice-Generator/logo.png"
+          alt="Black Pegasus Logo"
+          class="logo"
+        />
         <div id="invoiceContent"></div>
       </div>
     </div>
@@ -136,10 +142,10 @@
       function removeItemRow(button) {
         button.closest("tr").remove();
       }
-      let orderID = null
+      let orderID = null;
       // Generate Invoice
       function generateInvoice() {
-        orderID = generateOrderID()
+        orderID = generateOrderID();
         const name = document.getElementById("name").value;
         const phone = document.getElementById("phone").value;
         const address = document.getElementById("address").value;
@@ -152,7 +158,8 @@
           const itemName = row.cells[0].querySelector("input").value;
           const qty = parseInt(row.cells[1].querySelector("input").value) || 0;
           const size = row.cells[2].querySelector("input").value;
-          const unitPrice = parseFloat(row.cells[3].querySelector("input").value) || 0;
+          const unitPrice =
+            parseFloat(row.cells[3].querySelector("input").value) || 0;
           const itemCode = row.cells[4].querySelector("input").value;
           if (itemName && qty && size && unitPrice && itemCode) {
             items.push({
@@ -171,12 +178,12 @@
         }
 
         let tableHTML = `
-          <table>
+          <br><br><table>
             <tr><th>Item Name</th><th>Qty</th><th>Size</th><th>Unit Price (EGP)</th><th>Price (EGP)</th><th>Item Code</th></tr>
         `;
 
         let totalBefore = 0;
-        items.forEach(item => {
+        items.forEach((item) => {
           const price = item.qty * item.unitPrice;
           totalBefore += price;
           tableHTML += `
@@ -193,8 +200,18 @@
 
         tableHTML += "</table>";
 
-        const shippingFee = 0
-        const totalAfter = 0
+        const shippingFee = 0;
+        const totalAfter = 0;
+        const deliveryOptions = Array.from({ length: 15 }, (_, i) => i + 1)
+          .map((day) => `<option value="${day}">${day} days</option>`)
+          .join("");
+          const shippingOptions = Array.from(
+          { length: 15 },
+          (_, i) => (i + 1) * 10
+        )
+          .map((fee) => `<option value="${fee}">${fee} EGP</option>`)
+          .join("");
+
 
         const customerInfoHTML = `
           <div class="customer-info">
@@ -209,12 +226,24 @@
         const totalSectionHTML = `
           <div class="total-section">
             <div>
-              <label>Shipping Fee: </label>
-              <input type="number" id="shippingFee" value="0" onchange="updateTotal()" />
-            </div>
+                        <label>Shipping Fee: </label>
+                        <select id="shippingFee" onchange="updateTotal()">
+                            ${shippingOptions}
+                        </select>
+                    </div>
             <div>
-              <p><strong>Total Before Shipping:</strong> <span id="totalBefore">${totalBefore.toFixed(2)}</span> EGP</p>
-              <p><strong>Total After Shipping:</strong> <span id="totalAfter">${totalAfter.toFixed(2)}</span> EGP</p>
+                        <label>Estimated Delivery: </label>
+                        <select id="deliveryTime">
+                            ${deliveryOptions}
+                        </select>
+                    </div>
+            <div>
+              <p><strong>Total Before Shipping:</strong> <span id="totalBefore">${totalBefore.toFixed(
+                2
+              )}</span> EGP</p>
+              <p><strong>Total After Shipping:</strong> <span id="totalAfter">${totalAfter.toFixed(
+                2
+              )}</span> EGP</p>
               
             </div>
           </div>
@@ -229,8 +258,11 @@
 
       // Update total
       function updateTotal() {
-        const totalBefore = parseFloat(document.getElementById("totalBefore").innerText);
-        const shippingFee = parseFloat(document.getElementById("shippingFee").value) || 0;
+        const totalBefore = parseFloat(
+          document.getElementById("totalBefore").innerText
+        );
+        const shippingFee =
+          parseFloat(document.getElementById("shippingFee").value) || 0;
         const totalAfter = totalBefore + shippingFee;
         document.getElementById("totalAfter").innerText = totalAfter.toFixed(2);
       }
