@@ -90,7 +90,7 @@
       .logo {
         display: block;
         margin: 0 auto;
-        width: 400px;
+        width: 150px;
       }
       .output {
         padding: 20px;
@@ -198,7 +198,7 @@
         tableHTML += "</table>";
 
         const shippingOptions = Array.from(
-          { length: 15 },
+          { length: 30 },
           (_, i) => (i + 1) * 10
         )
           .map((fee) => `<option value="${fee}">${fee} EGP</option>`)
