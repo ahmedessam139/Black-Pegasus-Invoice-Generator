@@ -57,8 +57,9 @@
       }
       th,
       td {
-        padding: 10px;
+        padding: 5px;
         text-align: center;
+        font-size: 16px; /* Small font size */
       }
       input {
         width: 100%;
@@ -90,7 +91,7 @@
       .logo {
         display: block;
         margin: 0 auto;
-        width: 150px;
+        width: 230px;
       }
       .output {
         padding: 20px;
@@ -182,19 +183,23 @@
         let tableHTML =
           "<table><tr><th>Item Name</th><th>Qty</th><th>Size</th><th>Unit Price (EGP)</th><th>Price (EGP)</th><th>Item Code</th></tr>";
         items.forEach((item) => {
+          const quantity = parseFloat(item.quantity) || 0;
+          const unitPrice = parseFloat(item.unitPrice) || 0;
+          const total = (quantity * unitPrice).toFixed(2);
+
           tableHTML += ` 
                     <tr>
                         <td>${item.name}</td>
-                        <td><input type="number" value="${
-                          item.quantity
-                        }" oninput="updateTotal()"></td>
+                        <td>
+                          ${item.quantity}
+                        </td>
                         <td>${item.size}</td>
-                        <td><input type="number" value="${
-                          item.unitPrice
-                        }" oninput="updateTotal()"></td>
-                        <td class="item-total">${(
-                          item.quantity * item.unitPrice
-                        ).toFixed(2)}</td>
+                        <td>
+                          ${item.unitPrice}
+                       </td>
+                        <td class="item-total">
+                          ${total}
+                          </td>
                         <td>${item.itemCode}</td>
                     </tr>
                 `;
@@ -250,26 +255,30 @@
       }
 
       function updateTotal() {
-        let totalBefore = 0;
-        document.querySelectorAll("table tr").forEach((row, index) => {
-          if (index === 0) return; // Skip header row
-          const quantity =
-            parseFloat(row.cells[1].querySelector("input").value) || 0;
-          const unitPrice =
-            parseFloat(row.cells[3].querySelector("input").value) || 0;
-          const rowTotal = quantity * unitPrice;
-          row.cells[4].innerText = rowTotal.toFixed(2);
-          totalBefore += rowTotal;
-        });
+  let totalBefore = 0;
+  document.querySelectorAll("table tr").forEach((row, index) => {
+    if (index === 0) return; // Skip the header row
 
-        const shippingFee =
-          parseFloat(document.getElementById("shippingFee").value) || 0;
-        document.getElementById("totalBefore").innerText =
-          totalBefore.toFixed(2);
-        document.getElementById("totalAfter").innerText = (
-          totalBefore + shippingFee
-        ).toFixed(2);
-      }
+    // Extract quantity and unit price from table cells
+    const quantity = parseFloat(row.cells[1].innerText.trim()) || 0;
+    const unitPrice = parseFloat(row.cells[3].innerText.trim()) || 0;
+
+    // Calculate the row total
+    const rowTotal = quantity * unitPrice;
+    row.cells[4].innerText = rowTotal.toFixed(2); // Update the row total in the table
+    totalBefore += rowTotal; // Accumulate the total
+  });
+
+  console.log(totalBefore);
+
+  // Get the shipping fee value and ensure it's a number
+  const shippingFee = parseFloat(document.getElementById("shippingFee").value) || 0;
+
+  // Update the totalBefore and totalAfter elements
+  document.getElementById("totalBefore").innerText = totalBefore.toFixed(2);
+  document.getElementById("totalAfter").innerText = (totalBefore + shippingFee).toFixed(2);
+}
+
 
       function generateTimestamp() {
         const now = new Date();
