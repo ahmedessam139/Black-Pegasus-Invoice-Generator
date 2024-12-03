@@ -267,6 +267,7 @@
       }
       function generateTimestamp() {
         const now = new Date();
+        now.setHours(now.getHours() + 2); // Add 2 hours to the current time
         const dateStr = now.toISOString().slice(0, 16).replace("T", " ");
         return dateStr;
       }

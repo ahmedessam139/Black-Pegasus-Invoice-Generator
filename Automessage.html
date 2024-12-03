@@ -112,7 +112,11 @@
       <div id="output" class="output">
         <h2></h2>
         <!-- put logo here -->
-        <img src="https://ahmedessam139.github.io/Black-Pegasus-Invoice-Generator/logo.png" alt="Black Pegasus Logo" class="logo" />
+        <img
+          src="https://ahmedessam139.github.io/Black-Pegasus-Invoice-Generator/logo.png"
+          alt="Black Pegasus Logo"
+          class="logo"
+        />
         <div id="invoiceContent"></div>
       </div>
     </div>
@@ -269,6 +273,7 @@
 
       function generateTimestamp() {
         const now = new Date();
+        now.setHours(now.getHours() + 2); // Add 2 hours to the current time
         const dateStr = now.toISOString().slice(0, 16).replace("T", " ");
         return dateStr;
       }
@@ -283,7 +288,14 @@
         const element = document.getElementById("output");
         const options = {
           filename: `${orderID}.pdf`,
+          margin: [10, 0, 10, 0], // top, right, bottom, left in millimeters (mm)
+
           html2canvas: { scale: 2 },
+          jsPDF: {
+            unit: "mm",
+            format: "a4",
+            orientation: "portrait",
+          },
         };
 
         html2pdf().from(element).set(options).save();
