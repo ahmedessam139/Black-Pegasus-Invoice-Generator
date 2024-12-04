@@ -127,6 +127,7 @@
 
     <script>
       let orderID = null;
+      let totalPrice = 0;
       function generateInvoice() {
         orderID = generateOrderID();
         const message = document.getElementById("orderMessage").value;
@@ -181,29 +182,43 @@
         const customerInfo = extractCustomerInfo(message);
 
         let tableHTML =
-          "<table><tr><th>Item Name</th><th>Qty</th><th>Size</th><th>Unit Price (EGP)</th><th>Price (EGP)</th><th>Item Code</th></tr>";
-        items.forEach((item) => {
+          "<table><tr><th>#</th><th>Item Name</th><th>Qty</th><th>Size</th><th>Unit Price (EGP)</th><th>Price (EGP)</th><th>Item Code</th></tr>";
+
+        let totalQty = 0;
+        totalPrice = 0;
+
+        items.forEach((item, index) => {
           const quantity = parseFloat(item.quantity) || 0;
           const unitPrice = parseFloat(item.unitPrice) || 0;
           const total = (quantity * unitPrice).toFixed(2);
 
+          totalQty += quantity;
+          totalPrice += parseFloat(total);
+
           tableHTML += ` 
-                    <tr>
-                        <td>${item.name}</td>
-                        <td>
-                          ${item.quantity}
-                        </td>
-                        <td>${item.size}</td>
-                        <td>
-                          ${item.unitPrice}
-                       </td>
-                        <td class="item-total">
-                          ${total}
-                          </td>
-                        <td>${item.itemCode}</td>
-                    </tr>
-                `;
+    <tr>
+      <td>${index + 1}</td>  <!-- Row count -->
+      <td>${item.name}</td>
+      <td>${item.quantity}</td>
+      <td>${item.size}</td>
+      <td>${item.unitPrice}</td>
+      <td class="item-total">${total}</td>
+      <td>${item.itemCode}</td>
+    </tr>
+  `;
         });
+
+        // Add the total row at the end
+        tableHTML += `
+  <tr>
+    <td colspan="2"><strong>Total</strong></td>
+    <td><strong>${totalQty}</strong></td>
+    <td colspan="2">--</td>  
+    <td><strong>${totalPrice.toFixed(2)}</strong></td>
+    <td>--</td>  
+  </tr>
+`;
+
         tableHTML += "</table>";
 
         const shippingOptions = Array.from(
@@ -255,30 +270,24 @@
       }
 
       function updateTotal() {
-  let totalBefore = 0;
-  document.querySelectorAll("table tr").forEach((row, index) => {
-    if (index === 0) return; // Skip the header row
+        let totalBefore = 0;
+        
 
-    // Extract quantity and unit price from table cells
-    const quantity = parseFloat(row.cells[1].innerText.trim()) || 0;
-    const unitPrice = parseFloat(row.cells[3].innerText.trim()) || 0;
+        totalBefore = totalPrice.toFixed(2)
 
-    // Calculate the row total
-    const rowTotal = quantity * unitPrice;
-    row.cells[4].innerText = rowTotal.toFixed(2); // Update the row total in the table
-    totalBefore += rowTotal; // Accumulate the total
-  });
+        console.log(totalBefore);
 
-  console.log(totalBefore);
+        // Get the shipping fee value and ensure it's a number
+        const shippingFee =
+          parseFloat(document.getElementById("shippingFee").value) || 0;
 
-  // Get the shipping fee value and ensure it's a number
-  const shippingFee = parseFloat(document.getElementById("shippingFee").value) || 0;
-
-  // Update the totalBefore and totalAfter elements
-  document.getElementById("totalBefore").innerText = totalBefore.toFixed(2);
-  document.getElementById("totalAfter").innerText = (totalBefore + shippingFee).toFixed(2);
-}
-
+        // Update the totalBefore and totalAfter elements
+        document.getElementById("totalBefore").innerText =
+          totalBefore;
+        document.getElementById("totalAfter").innerText = (
+          parseFloat(totalBefore) + shippingFee
+        );
+      }
 
       function generateTimestamp() {
         const now = new Date();
