@@ -159,7 +159,7 @@
         const patterns = {
           name: /Name:\s*(.*?)\n/,
           phone: /Phone:\s*(.*?)\n/,
-          address: /Address:\s*(.*?)\n/,
+          address: /Address:\s*([\s\S]*?)\s*City:/,
           city: /City:\s*(.*?)\n/,
           notes: /Notes:\s*(.*)/,
         };
