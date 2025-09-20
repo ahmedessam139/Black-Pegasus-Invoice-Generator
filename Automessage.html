@@ -109,6 +109,9 @@
       <br />
       <button onclick="generateInvoice()">Generate Invoice</button>
       <button onclick="downloadPDF()">Download as PDF</button>
+      <button onclick="sortBySize()" id="sortButton" style="display: none">
+        Sort by Size
+      </button>
 
       <div id="output" class="output">
         <h2></h2>
@@ -128,6 +131,7 @@
     <script>
       let orderID = null;
       let totalPrice = 0;
+      let currentItems = []; // Store items globally for sorting
       function generateInvoice() {
         orderID = generateOrderID();
         const message = document.getElementById("orderMessage").value;
@@ -152,6 +156,16 @@
             unitPrice: parseFloat(match[4]),
             itemCode: match[5].trim(),
           });
+        }
+
+        // Store items globally for sorting
+        currentItems = items;
+
+        // Show sort button if there are items
+        if (items.length > 0) {
+          document.getElementById("sortButton").style.display = "inline-block";
+        } else {
+          document.getElementById("sortButton").style.display = "none";
         }
 
         // Customer Info
@@ -208,12 +222,16 @@
   `;
         });
 
+        // Calculate total sizes
+        const totalSizes = calculateTotalSizes(items);
+
         // Add the total row at the end
         tableHTML += `
   <tr>
     <td colspan="2"><strong>Total</strong></td>
     <td><strong>${totalQty}</strong></td>
-    <td colspan="2">--</td>  
+    <td><strong>${totalSizes}ml</strong></td>
+    <td>--</td>  
     <td><strong>${totalPrice.toFixed(2)}</strong></td>
     <td>--</td>  
   </tr>
@@ -271,9 +289,8 @@
 
       function updateTotal() {
         let totalBefore = 0;
-        
 
-        totalBefore = totalPrice.toFixed(2)
+        totalBefore = totalPrice.toFixed(2);
 
         console.log(totalBefore);
 
@@ -282,11 +299,9 @@
           parseFloat(document.getElementById("shippingFee").value) || 0;
 
         // Update the totalBefore and totalAfter elements
-        document.getElementById("totalBefore").innerText =
-          totalBefore;
-        document.getElementById("totalAfter").innerText = (
-          parseFloat(totalBefore) + shippingFee
-        );
+        document.getElementById("totalBefore").innerText = totalBefore;
+        document.getElementById("totalAfter").innerText =
+          parseFloat(totalBefore) + shippingFee;
       }
 
       function generateTimestamp() {
@@ -300,6 +315,174 @@
         const timestamp = generateTimestamp().replace(/\D/g, "").slice(0, 12); // YYYYMMDDHHMM
         const randomDigits = Math.floor(1000 + Math.random() * 9000);
         return `${timestamp}-${randomDigits}`;
+      }
+
+      // Function to extract numbers from size text
+      function extractSizeNumber(sizeText) {
+        // Remove all non-numeric characters except dots and commas
+        const numbers = sizeText.match(/\d+(?:\.\d+)?/g);
+        if (numbers && numbers.length > 0) {
+          // Return the first number found, converted to float
+          return parseFloat(numbers[0]);
+        }
+        // If no number found, return 0 for sorting purposes
+        return 0;
+      }
+
+      // Function to calculate total of all sizes
+      function calculateTotalSizes(items) {
+        let totalSizes = 0;
+        items.forEach((item) => {
+          const sizeNumber = extractSizeNumber(item.size);
+          const quantity = parseFloat(item.quantity) || 0;
+          totalSizes += sizeNumber * quantity;
+        });
+        return Math.round(totalSizes); // Return as integer
+      }
+
+      // Function to sort items by size
+      function sortBySize() {
+        if (currentItems.length === 0) {
+          alert("No items to sort. Please generate an invoice first.");
+          return;
+        }
+
+        // Sort items by extracted size numbers
+        const sortedItems = [...currentItems].sort((a, b) => {
+          const sizeA = extractSizeNumber(a.size);
+          const sizeB = extractSizeNumber(b.size);
+          return sizeA - sizeB;
+        });
+
+        // Update the global items array
+        currentItems = sortedItems;
+
+        // Regenerate the table with sorted items
+        regenerateTable();
+      }
+
+      // Function to regenerate the table with current items
+      function regenerateTable() {
+        const outputDiv = document.getElementById("invoiceContent");
+
+        // Clear the content
+        outputDiv.innerHTML = "";
+
+        // Generate new table
+        let tableHTML =
+          "<table><tr><th>#</th><th>Item Name</th><th>Qty</th><th>Size</th><th>Unit Price (EGP)</th><th>Price (EGP)</th><th>Item Code</th></tr>";
+
+        let totalQty = 0;
+        totalPrice = 0;
+
+        currentItems.forEach((item, index) => {
+          const quantity = parseFloat(item.quantity) || 0;
+          const unitPrice = parseFloat(item.unitPrice) || 0;
+          const total = (quantity * unitPrice).toFixed(2);
+
+          totalQty += quantity;
+          totalPrice += parseFloat(total);
+
+          tableHTML += ` 
+    <tr>
+      <td>${index + 1}</td>  <!-- Row count -->
+      <td>${item.name}</td>
+      <td>${item.quantity}</td>
+      <td>${item.size}</td>
+      <td>${item.unitPrice}</td>
+      <td class="item-total">${total}</td>
+      <td>${item.itemCode}</td>
+    </tr>
+  `;
+        });
+
+        // Calculate total sizes
+        const totalSizes = calculateTotalSizes(currentItems);
+
+        // Add the total row at the end
+        tableHTML += `
+  <tr>
+    <td colspan="2"><strong>Total</strong></td>
+    <td><strong>${totalQty}</strong></td>
+    <td><strong>${totalSizes}ml</strong></td>
+    <td>--</td>  
+    <td><strong>${totalPrice.toFixed(2)}</strong></td>
+    <td>--</td>  
+  </tr>
+`;
+
+        tableHTML += "</table>";
+
+        // Recreate the total section with shipping options
+        const shippingOptions = Array.from(
+          { length: 30 },
+          (_, i) => (i + 1) * 10
+        )
+          .map((fee) => `<option value="${fee}">${fee} EGP</option>`)
+          .join("");
+
+        const deliveryOptions = Array.from({ length: 15 }, (_, i) => i + 1)
+          .map((day) => `<option value="${day}">${day} days</option>`)
+          .join("");
+
+        const totalSectionHTML = `
+                <div class="total-section">
+                    <div>
+                        <label>Shipping Fee: </label>
+                        <select id="shippingFee" onchange="updateTotal()">
+                            ${shippingOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Estimated Delivery: </label>
+                        <select id="deliveryTime">
+                            ${deliveryOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <p><strong>Total Before Shipping:</strong> <span id="totalBefore"></span> EGP</p>
+                        <p><strong>Total After Shipping:</strong> <span id="totalAfter"></span> EGP</p>
+                    </div>
+                </div>
+                <p><strong>Invoice Generated:</strong> ${generateTimestamp()}</p>
+                <p><strong>Order ID:</strong> ${orderID}</p>
+            `;
+
+        // Recreate customer info (we need to extract it from the original message)
+        const message = document.getElementById("orderMessage").value;
+        const patterns = {
+          name: /Name:\s*(.*?)\n/,
+          phone: /Phone:\s*(.*?)\n/,
+          address: /Address:\s*([\s\S]*?)\s*City:/,
+          city: /City:\s*(.*?)\n/,
+          notes: /Notes:\s*(.*)/,
+        };
+
+        const extractCustomerInfo = (message) => {
+          const customerInfo = {};
+          for (const [key, pattern] of Object.entries(patterns)) {
+            const match = message.match(pattern);
+            if (match) {
+              customerInfo[key] = match[1].trim();
+            }
+          }
+          return customerInfo;
+        };
+
+        const customerInfo = extractCustomerInfo(message);
+        const customerInfoHTML = `
+                <div class="customer-info">
+                    <p><strong>Name:</strong> ${customerInfo.name}</p>
+                    <p><strong>Phone:</strong> ${customerInfo.phone}</p>
+                    <p><strong>Address:</strong> ${customerInfo.address}</p>
+                    <p><strong>City:</strong> ${customerInfo.city}</p>
+                    <p><strong>Notes:</strong> ${customerInfo.notes}</p>
+                </div>
+            `;
+
+        // Rebuild the content
+        outputDiv.innerHTML = customerInfoHTML + tableHTML + totalSectionHTML;
+        updateTotal();
       }
 
       function downloadPDF() {
