@@ -72,6 +72,18 @@
         justify-content: space-between;
         margin-top: 20px;
       }
+      .total-after-shipping {
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 18px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        margin: 10px 0;
+        border: 2px solid #2e7d32;
+      }
       select {
         padding: 5px;
       }
@@ -266,8 +278,11 @@
                     </div>
                     <div>
                         <p><strong>Total Before Shipping:</strong> <span id="totalBefore"></span> EGP</p>
-                        <p><strong>Total After Shipping:</strong> <span id="totalAfter"></span> EGP</p>
+                        <p><strong>Shipping Fee:</strong> <span id="shippingFeeDisplay">0</span> EGP</p>
                     </div>
+                </div>
+                <div class="total-after-shipping">
+                    <strong>Grand Total : <span id="totalAfter"></span> EGP</strong>
                 </div>
                 <p><strong>Invoice Generated:</strong> ${generateTimestamp()}</p>
                 <p><strong>Order ID:</strong> ${orderID}</p>
@@ -298,8 +313,9 @@
         const shippingFee =
           parseFloat(document.getElementById("shippingFee").value) || 0;
 
-        // Update the totalBefore and totalAfter elements
+        // Update the totalBefore, shippingFeeDisplay, and totalAfter elements
         document.getElementById("totalBefore").innerText = totalBefore;
+        document.getElementById("shippingFeeDisplay").innerText = shippingFee;
         document.getElementById("totalAfter").innerText =
           parseFloat(totalBefore) + shippingFee;
       }
@@ -441,8 +457,11 @@
                     </div>
                     <div>
                         <p><strong>Total Before Shipping:</strong> <span id="totalBefore"></span> EGP</p>
-                        <p><strong>Total After Shipping:</strong> <span id="totalAfter"></span> EGP</p>
+                        <p><strong>Shipping Fee:</strong> <span id="shippingFeeDisplay">0</span> EGP</p>
                     </div>
+                </div>
+                <div class="total-after-shipping">
+                    <strong>Total After Shipping: <span id="totalAfter"></span> EGP</strong>
                 </div>
                 <p><strong>Invoice Generated:</strong> ${generateTimestamp()}</p>
                 <p><strong>Order ID:</strong> ${orderID}</p>
