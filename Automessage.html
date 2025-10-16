@@ -251,10 +251,10 @@
 
         tableHTML += "</table>";
 
-        const shippingOptions = Array.from(
-          { length: 30 },
-          (_, i) => (i + 1) * 10
-        )
+        const shippingOptions = [
+          0,
+          ...Array.from({ length: 30 }, (_, i) => (i + 1) * 10),
+        ]
           .map((fee) => `<option value="${fee}">${fee} EGP</option>`)
           .join("");
 
@@ -430,10 +430,10 @@
         tableHTML += "</table>";
 
         // Recreate the total section with shipping options
-        const shippingOptions = Array.from(
-          { length: 30 },
-          (_, i) => (i + 1) * 10
-        )
+        const shippingOptions = [
+          0,
+          ...Array.from({ length: 30 }, (_, i) => (i + 1) * 10),
+        ]
           .map((fee) => `<option value="${fee}">${fee} EGP</option>`)
           .join("");
 
