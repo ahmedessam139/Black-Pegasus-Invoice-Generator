@@ -7,18 +7,16 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        background: linear-gradient(180deg, #eef6ff 0%, #f8fbff 50%, #ffffff 100%);
+        background-color: #f5f5f5;
         margin: 20px;
-        color: #102a43;
       }
       .container {
         max-width: 800px;
         margin: auto;
-        background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+        background-color: #fff;
         padding: 20px;
-        box-shadow: 0 12px 30px rgba(11, 70, 132, 0.12);
-        border-radius: 14px;
-        border: 1px solid #d9e8f8;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
       }
       textarea {
         width: 100%;
@@ -38,58 +36,30 @@
       button {
         padding: 10px 20px;
         margin: 5px 0;
-        background: linear-gradient(135deg, #22b8ff, #2f80ed);
-        color: #ffffff;
-        border: 1px solid #1b6ad6;
+        background-color: #4caf50;
+        color: white;
+        border: none;
         cursor: pointer;
-        border-radius: 8px;
-        font-weight: 600;
-        box-shadow: 0 5px 12px rgba(47, 128, 237, 0.25);
+        border-radius: 5px;
       }
       button:hover {
-        background: linear-gradient(135deg, #1ea6e6, #2469ca);
+        background-color: #45a049;
       }
-      .invoice-table {
+      table {
         width: 100%;
-        min-width: 760px;
-        border-collapse: separate;
-        border-spacing: 0;
+        border-collapse: collapse;
         margin-bottom: 20px;
-        border: 1px solid #d4dbe6;
-        border-radius: 12px;
-        overflow: hidden;
-        background: #ffffff;
-        box-shadow: 0 8px 20px rgba(16, 24, 40, 0.08);
       }
-      .invoice-table th,
-      .invoice-table td {
-        padding: 10px 8px;
+      table,
+      th,
+      td {
+        border: 1px solid #ccc;
+      }
+      th,
+      td {
+        padding: 5px;
         text-align: center;
-        font-size: 14px;
-        border-bottom: 1px solid #e7edf5;
-      }
-      .invoice-table th {
-        background: linear-gradient(135deg, #dff3ff, #cfe9ff);
-        color: #0b3b66;
-        font-weight: 700;
-        letter-spacing: 0.4px;
-        text-transform: uppercase;
-      }
-      .invoice-table tr:nth-child(even) td {
-        background: #f8fbff;
-      }
-      .invoice-table tr:hover td {
-        background: #eef6ff;
-      }
-      .invoice-table .item-total {
-        font-weight: 700;
-        color: #0b6bcb;
-      }
-      .invoice-table .size-value {
-        font-weight: 700;
-      }
-      #invoiceContent {
-        overflow-x: auto;
+        font-size: 16px; /* Small font size */
       }
       input {
         width: 100%;
@@ -103,64 +73,29 @@
         margin-top: 20px;
       }
       .total-after-shipping {
-        background: linear-gradient(135deg, #e9f7ff, #d9efff);
-        color: #0d4e8f;
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
         padding: 12px 16px;
         border-radius: 8px;
         font-weight: bold;
         font-size: 18px;
         text-align: center;
-        box-shadow: 0 4px 12px rgba(13, 78, 143, 0.18);
+        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
         margin: 10px 0;
-        border: 2px solid #9dd0fb;
+        border: 2px solid #2e7d32;
       }
       select {
         padding: 5px;
       }
       h1 {
         text-align: center;
-        color: #0c3f6d;
-        letter-spacing: 0.3px;
+        color: #333;
       }
       .customer-info {
         margin-bottom: 20px;
-        padding: 14px;
-        border: 1px solid #d2e7fb;
-        background: linear-gradient(180deg, #f8fcff 0%, #eef7ff 100%);
-        border-radius: 10px;
-      }
-      .customer-info h3 {
-        margin: 0 0 10px 0;
-        color: #0c3f6d;
-        font-size: 16px;
-        letter-spacing: 0.2px;
-      }
-      .customer-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
-      .customer-item {
-        background: #ffffff;
-        border: 1px solid #d9e8f8;
-        border-radius: 8px;
-        padding: 8px 10px;
-      }
-      .customer-item.full-width {
-        grid-column: 1 / -1;
-      }
-      .customer-label {
-        display: block;
-        font-size: 11px;
-        color: #5f7f9f;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 4px;
-      }
-      .customer-value {
-        color: #123b63;
-        font-weight: 600;
-        word-break: break-word;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
       }
       .customer-info p {
         margin: 5px 0;
@@ -173,20 +108,6 @@
       .output {
         padding: 20px;
         margin-top: 20px;
-      }
-      @media (max-width: 768px) {
-        .customer-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-      @media print {
-        body {
-          background: #ffffff;
-        }
-        .container {
-          box-shadow: none;
-          border: 1px solid #d7e6f4;
-        }
       }
     </style>
   </head>
@@ -208,10 +129,9 @@
         <h2></h2>
         <!-- put logo here -->
         <img
-          src="./logo.png"
+          src="https://ahmedessam139.github.io/Black-Pegasus-Invoice-Generator/logo.png"
           alt="Black Pegasus Logo"
           class="logo"
-          crossorigin="anonymous"
         />
         <div id="invoiceContent"></div>
       </div>
@@ -224,17 +144,6 @@
       let orderID = null;
       let totalPrice = 0;
       let currentItems = []; // Store items globally for sorting
-      let sizeColorMap = {};
-      const sizeColorPalette = [
-        "#0369a1",
-        "#4338ca",
-        "#0f766e",
-        "#a16207",
-        "#be185d",
-        "#166534",
-        "#92400e",
-        "#1d4ed8",
-      ];
       function generateInvoice() {
         orderID = generateOrderID();
         const message = document.getElementById("orderMessage").value;
@@ -263,7 +172,6 @@
 
         // Store items globally for sorting
         currentItems = items;
-        sizeColorMap = {};
 
         // Show sort button if there are items
         if (items.length > 0) {
@@ -300,7 +208,7 @@
         const customerInfo = extractCustomerInfo(message);
 
         let tableHTML =
-          "<table class='invoice-table'><tr><th>#</th><th>Item Name</th><th>Size</th><th>Qty (pcs)</th><th>Unit Price (EGP)</th><th>Price (EGP)</th><th>Item Code</th></tr>";
+          "<table><tr><th>#</th><th>Item Name</th><th>Qty</th><th>Size</th><th>Unit Price (EGP)</th><th>Price (EGP)</th><th>Item Code</th></tr>";
 
         let totalQty = 0;
         totalPrice = 0;
@@ -317,8 +225,8 @@
     <tr>
       <td>${index + 1}</td>  <!-- Row count -->
       <td>${item.name}</td>
-      <td><span class="size-value" style="color: ${getSizeColor(item.size)}">${item.size}</span></td>
-      <td>${item.quantity} pcs</td>
+      <td>${item.quantity}</td>
+      <td>${item.size}</td>
       <td>${item.unitPrice}</td>
       <td class="item-total">${total}</td>
       <td>${item.itemCode}</td>
@@ -333,8 +241,8 @@
         tableHTML += `
   <tr>
     <td colspan="2"><strong>Total</strong></td>
-    <td><strong>${totalSizes} ml</strong></td>
-    <td><strong>${totalQty} pcs</strong></td>
+    <td><strong>${totalQty}</strong></td>
+    <td><strong>${totalSizes}ml</strong></td>
     <td>--</td>  
     <td><strong>${totalPrice.toFixed(2)}</strong></td>
     <td>--</td>  
@@ -382,29 +290,11 @@
 
         const customerInfoHTML = `
                 <div class="customer-info">
-                    <h3>Customer Information</h3>
-                    <div class="customer-grid">
-                      <div class="customer-item">
-                        <span class="customer-label">Name</span>
-                        <span class="customer-value">${customerInfo.name || "-"}</span>
-                      </div>
-                      <div class="customer-item">
-                        <span class="customer-label">Phone</span>
-                        <span class="customer-value">${customerInfo.phone || "-"}</span>
-                      </div>
-                      <div class="customer-item full-width">
-                        <span class="customer-label">Address</span>
-                        <span class="customer-value">${customerInfo.address || "-"}</span>
-                      </div>
-                      <div class="customer-item">
-                        <span class="customer-label">City</span>
-                        <span class="customer-value">${customerInfo.city || "-"}</span>
-                      </div>
-                      <div class="customer-item">
-                        <span class="customer-label">Notes</span>
-                        <span class="customer-value">${customerInfo.notes || "-"}</span>
-                      </div>
-                    </div>
+                    <p><strong>Name:</strong> ${customerInfo.name}</p>
+                    <p><strong>Phone:</strong> ${customerInfo.phone}</p>
+                    <p><strong>Address:</strong> ${customerInfo.address}</p>
+                    <p><strong>City:</strong> ${customerInfo.city}</p>
+                    <p><strong>Notes:</strong> ${customerInfo.notes}</p>
                 </div>
             `;
 
@@ -441,18 +331,6 @@
         const timestamp = generateTimestamp().replace(/\D/g, "").slice(0, 12); // YYYYMMDDHHMM
         const randomDigits = Math.floor(1000 + Math.random() * 9000);
         return `${timestamp}-${randomDigits}`;
-      }
-
-      function getSizeColor(sizeText) {
-        const key = (sizeText || "").trim().toLowerCase();
-        if (!key) {
-          return "#0b3b66";
-        }
-        if (!sizeColorMap[key]) {
-          const colorIndex = Object.keys(sizeColorMap).length % sizeColorPalette.length;
-          sizeColorMap[key] = sizeColorPalette[colorIndex];
-        }
-        return sizeColorMap[key];
       }
 
       // Function to extract numbers from size text
@@ -508,7 +386,7 @@
 
         // Generate new table
         let tableHTML =
-          "<table class='invoice-table'><tr><th>#</th><th>Item Name</th><th>Size</th><th>Qty (pcs)</th><th>Unit Price (EGP)</th><th>Price (EGP)</th><th>Item Code</th></tr>";
+          "<table><tr><th>#</th><th>Item Name</th><th>Qty</th><th>Size</th><th>Unit Price (EGP)</th><th>Price (EGP)</th><th>Item Code</th></tr>";
 
         let totalQty = 0;
         totalPrice = 0;
@@ -525,8 +403,8 @@
     <tr>
       <td>${index + 1}</td>  <!-- Row count -->
       <td>${item.name}</td>
-      <td><span class="size-value" style="color: ${getSizeColor(item.size)}">${item.size}</span></td>
-      <td>${item.quantity} pcs</td>
+      <td>${item.quantity}</td>
+      <td>${item.size}</td>
       <td>${item.unitPrice}</td>
       <td class="item-total">${total}</td>
       <td>${item.itemCode}</td>
@@ -541,8 +419,8 @@
         tableHTML += `
   <tr>
     <td colspan="2"><strong>Total</strong></td>
-    <td><strong>${totalSizes} ml</strong></td>
-    <td><strong>${totalQty} pcs</strong></td>
+    <td><strong>${totalQty}</strong></td>
+    <td><strong>${totalSizes}ml</strong></td>
     <td>--</td>  
     <td><strong>${totalPrice.toFixed(2)}</strong></td>
     <td>--</td>  
@@ -613,29 +491,11 @@
         const customerInfo = extractCustomerInfo(message);
         const customerInfoHTML = `
                 <div class="customer-info">
-                    <h3>Customer Information</h3>
-                    <div class="customer-grid">
-                      <div class="customer-item">
-                        <span class="customer-label">Name</span>
-                        <span class="customer-value">${customerInfo.name || "-"}</span>
-                      </div>
-                      <div class="customer-item">
-                        <span class="customer-label">Phone</span>
-                        <span class="customer-value">${customerInfo.phone || "-"}</span>
-                      </div>
-                      <div class="customer-item full-width">
-                        <span class="customer-label">Address</span>
-                        <span class="customer-value">${customerInfo.address || "-"}</span>
-                      </div>
-                      <div class="customer-item">
-                        <span class="customer-label">City</span>
-                        <span class="customer-value">${customerInfo.city || "-"}</span>
-                      </div>
-                      <div class="customer-item">
-                        <span class="customer-label">Notes</span>
-                        <span class="customer-value">${customerInfo.notes || "-"}</span>
-                      </div>
-                    </div>
+                    <p><strong>Name:</strong> ${customerInfo.name}</p>
+                    <p><strong>Phone:</strong> ${customerInfo.phone}</p>
+                    <p><strong>Address:</strong> ${customerInfo.address}</p>
+                    <p><strong>City:</strong> ${customerInfo.city}</p>
+                    <p><strong>Notes:</strong> ${customerInfo.notes}</p>
                 </div>
             `;
 
@@ -644,24 +504,13 @@
         updateTotal();
       }
 
-      async function downloadPDF() {
+      function downloadPDF() {
         const element = document.getElementById("output");
-        const logo = document.querySelector(".logo");
-        if (logo && !logo.complete) {
-          await new Promise((resolve) => {
-            logo.onload = resolve;
-            logo.onerror = resolve;
-          });
-        }
         const options = {
           filename: `${orderID}.pdf`,
           margin: [10, 0, 10, 0], // top, right, bottom, left in millimeters (mm)
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: "#ffffff",
-          },
+
+          html2canvas: { scale: 2 },
           jsPDF: {
             unit: "mm",
             format: "a4",
