@@ -543,28 +543,15 @@ async function parsePDF(file) {
     const qtyStr = qtyWords.map(w => w.text).join('').trim();
     const qty = parseInt(qtyStr) || 1;
 
-    // Code: rightmost column — must match BP-style product codes (letters+digits)
+    // Size: words around xSize column
+    const sizeWords = ws.filter(w => w.x >= xSize - 10 && w.x < xCode - 5).sort((a,b) => a.x - b.x);
+    let size = sizeWords.map(w => w.text).join('').trim();
+    // Normalize reversed "ml100" → "100ml"
+    size = size.replace(/^ml(\d+)$/i, '$1ml').replace(/^(\d+)ml$/i, '$1ml');
+
+    // Code: words from xCode onwards
     const codeWords = ws.filter(w => w.x >= xCode - 10).sort((a,b) => a.x - b.x);
     const code = codeWords.map(w => w.text).join('').trim();
-
-    // Size: everything between qty and code columns.
-    // Use a wide net (xSize - 40) to catch values like "tester-5ml" whose
-    // first word may start left of the nominal Size column.
-    const sizeWords = ws
-      .filter(w => w.x >= xQty + 15 && w.x < xCode - 5)
-      .sort((a, b) => a.x - b.x);
-    let size = sizeWords.map(w => w.text).join('').trim();
-
-    // Normalise common variants:
-    //   "ml100"        → "100ml"
-    //   "100 ml"       → "100ml"
-    //   "tester-5ml"   → kept as-is (already correct)
-    //   "tester- 5ml"  → "tester-5ml"
-    size = size
-      .replace(/^ml(\d+)$/i, '$1ml')          // ml100 → 100ml
-      .replace(/^(\d+)\s+ml$/i, '$1ml')        // 100 ml → 100ml
-      .replace(/tester[-\s]+(\d+\s*ml)/i, 'tester-$1') // tester- 5ml → tester-5ml
-      .trim();
 
     if (name && code) {
       items.push({ num, name, qty, size, code });
