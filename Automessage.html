@@ -1,339 +1,63 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Black Pegasus — Packing Tool</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --border: #e0ddd6;
-    --border-strong: #c8c5bc;
-    --text: #1a1916;
-    --text-muted: #6b6860;
-    --accent: #1a1916;
-    --accent-fg: #ffffff;
-    --info-bg: #e8f0fb;
-    --info-text: #1a4fa8;
-    --success-bg: #e6f4ea;
-    --success-text: #1a7a3a;
-    --danger-bg: #fdecea;
-    --danger-text: #b91c1c;
-    --warning-bg: #fff7e6;
-    --warning-text: #92400e;
-    --radius: 10px;
-    --radius-sm: 6px;
-  }
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.5;
-  }
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    height: 56px;
-  }
-  header .logo {
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  header .sep { color: var(--border-strong); font-size: 20px; }
-  header .subtitle { font-size: 13px; color: var(--text-muted); }
-
-  main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
-
-  /* DROP ZONE */
-  #drop-zone {
-    border: 2px dashed var(--border-strong);
-    border-radius: var(--radius);
-    padding: 3rem 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-    background: var(--surface);
-  }
-  #drop-zone:hover, #drop-zone.dragover {
-    background: var(--info-bg);
-    border-color: var(--info-text);
-  }
-  #drop-zone input[type=file] { display: none; }
-  #drop-zone .icon { font-size: 40px; margin-bottom: 12px; }
-  #drop-zone h2 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
-  #drop-zone p { font-size: 13px; color: var(--text-muted); }
-
-  /* STATUS */
-  #status-bar {
-    display: none;
-    margin-top: 1rem;
-    padding: 10px 14px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-  }
-  #status-bar.info { background: var(--info-bg); color: var(--info-text); }
-  #status-bar.err  { background: var(--danger-bg); color: var(--danger-text); }
-  #status-bar.ok   { background: var(--success-bg); color: var(--success-text); }
-
-  /* METRICS */
-  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 1.5rem; }
-  .metric {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.1rem 1.25rem;
-  }
-  .metric-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .metric-value { font-size: 28px; font-weight: 700; }
-
-  /* CARDS */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin-top: 1.5rem;
-    overflow: hidden;
-  }
-  .card-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .card-header h3 { font-size: 14px; font-weight: 600; }
-
-  /* SLIP LIST */
-  .slip-row {
-    display: grid;
-    grid-template-columns: 1fr 160px 1fr 60px 28px;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 16px;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-  .slip-row:last-child { border-bottom: none; }
-  .slip-filename { color: var(--text-muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .slip-id { font-family: monospace; font-size: 12px; color: var(--text-muted); }
-  .badge {
-    display: inline-block;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 99px;
-    font-weight: 600;
-    background: var(--success-bg);
-    color: var(--success-text);
-  }
-  .badge.warn { background: var(--warning-bg); color: var(--warning-text); }
-  .remove-btn {
-    background: none; border: none; cursor: pointer;
-    color: var(--text-muted); font-size: 18px; line-height: 1;
-    padding: 0; width: 24px; height: 24px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.1s;
-  }
-  .remove-btn:hover { background: var(--danger-bg); color: var(--danger-text); }
-
-  /* ITEM LIST */
-  .item-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 16px;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-  }
-  .item-row:last-child { border-bottom: none; }
-  .qty-bubble {
-    min-width: 40px; height: 40px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: var(--accent-fg);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; font-weight: 700;
-    flex-shrink: 0;
-  }
-  .item-name { font-weight: 600; flex: 1; }
-  .item-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-  .size-tag {
-    font-size: 12px; padding: 3px 9px;
-    border-radius: var(--radius-sm);
-    background: var(--bg);
-    border: 1px solid var(--border-strong);
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
-  .code-tag { font-family: monospace; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
-
-  /* ACTIONS */
-  .actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 1.5rem;
-  }
-  button.btn {
-    padding: 10px 20px;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1.5px solid var(--border-strong);
-    background: var(--surface);
-    color: var(--text);
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    transition: background 0.12s;
-  }
-  button.btn:hover { background: var(--bg); }
-  button.btn.primary {
-    background: var(--accent);
-    color: var(--accent-fg);
-    border-color: var(--accent);
-  }
-  button.btn.primary:hover { opacity: 0.88; }
-  button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
-
-  .text-sm-muted { font-size: 12px; color: var(--text-muted); }
-
-  footer {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 12px;
-    margin-top: 3rem;
-    padding-bottom: 2rem;
-  }
-
-  /* progress overlay */
-  #progress-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-  #progress-overlay.show { display: flex; }
-  .progress-box {
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: 2rem 2.5rem;
-    text-align: center;
-    min-width: 280px;
-  }
-  .progress-box h4 { font-size: 15px; margin-bottom: 1rem; }
-  .progress-bar-outer {
-    height: 6px; background: var(--border);
-    border-radius: 99px; overflow: hidden;
-  }
-  .progress-bar-inner {
-    height: 100%; background: var(--accent);
-    border-radius: 99px;
-    transition: width 0.2s;
-    width: 0%;
-  }
-  .progress-label { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
-
-  @media (max-width: 600px) {
-    main { padding: 1rem; }
-    .metrics { grid-template-columns: 1fr 1fr; }
-    .slip-row { grid-template-columns: 1fr 100px 32px; }
-    .slip-row .slip-id, .slip-row .slip-name { display: none; }
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <span class="logo">Black Pegasus</span>
-  <span class="sep">|</span>
-  <span class="subtitle">Packing Slip Aggregator</span>
-</header>
-
-<main>
-
-  <!-- DROP ZONE -->
-  <div id="drop-zone" onclick="document.getElementById('file-input').click()" role="button" tabindex="0" aria-label="Upload packing slip PDFs">
-    <input type="file" id="file-input" multiple accept=".pdf">
-    <div class="icon">📦</div>
-    <h2>Drop packing slip PDFs here</h2>
-    <p>Or click to select — you can upload multiple files at once</p>
-  </div>
-
-  <div id="status-bar"></div>
-
-  <!-- METRICS -->
-  <div class="metrics" id="metrics" style="display:none">
-    <div class="metric">
-      <div class="metric-label">Orders loaded</div>
-      <div class="metric-value" id="m-orders">0</div>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Black Pegasus Invoice Generator</title>
+    <style>
+      body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 20px; }
+      .container { max-width: 800px; margin: auto; background-color: #fff; padding: 20px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 10px; }
+      textarea { width: 100%; height: 150px; margin-bottom: 20px; padding: 10px; }
+      input, textarea, select { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; }
+      button { padding: 10px 20px; margin: 5px 0; background-color: #4caf50; color: white; border: none; cursor: pointer; border-radius: 5px; }
+      button:hover { background-color: #45a049; }
+      button.pdf-btn-price  { background-color: #1976d2; }
+      button.pdf-btn-price:hover { background-color: #1565c0; }
+      button.pdf-btn-noprice { background-color: #7b1fa2; }
+      button.pdf-btn-noprice:hover { background-color: #6a1b9a; }
+      table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+      table, th, td { border: 1px solid #ccc; }
+      th, td { padding: 5px; text-align: center; font-size: 16px; }
+      input { width: 100%; border: none; background: transparent; text-align: center; }
+      .total-section { display: flex; justify-content: space-between; margin-top: 20px; }
+      .total-after-shipping { background: linear-gradient(135deg, #4caf50, #45a049); color: white;
+        padding: 12px 16px; border-radius: 8px; font-weight: bold; font-size: 18px; text-align: center;
+        box-shadow: 0 4px 8px rgba(76,175,80,0.3); margin: 10px 0; border: 2px solid #2e7d32; }
+      select { padding: 5px; }
+      h1 { text-align: center; color: #333; }
+      .customer-info { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; background-color: #f9f9f9; }
+      .customer-info p { margin: 5px 0; }
+      .logo { display: block; margin: 0 auto; width: 230px; }
+      .output { padding: 20px; margin-top: 20px; }
+      .btn-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="invoiceContainer">
+      <h1>Black Pegasus Invoice Generator</h1>
+      <textarea id="orderMessage" placeholder="Paste your order message here..."></textarea>
+      <br />
+      <div class="btn-group">
+        <button onclick="generateInvoice()">Generate Invoice</button>
+        <button class="pdf-btn-price"   onclick="downloadPDF(true)">&#11015; Download PDF (With Prices)</button>
+        <button class="pdf-btn-noprice" onclick="downloadPDF(false)">&#11015; Download PDF (No Prices)</button>
+        <button onclick="sortBySize()" id="sortButton" style="display:none">Sort by Size</button>
+      </div>
+      <div id="output" class="output">
+        <h2></h2>
+        <img src="https://ahmedessam139.github.io/Black-Pegasus-Invoice-Generator/logo.png"
+             alt="Black Pegasus Logo" class="logo" />
+        <div id="invoiceContent"></div>
+      </div>
     </div>
-    <div class="metric">
-      <div class="metric-label">Unique products</div>
-      <div class="metric-value" id="m-products">0</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Total items</div>
-      <div class="metric-value" id="m-items">0</div>
-    </div>
-  </div>
 
-  <!-- FILES CARD -->
-  <div class="card" id="files-card" style="display:none">
-    <div class="card-header">
-      <h3>📄 Loaded slips</h3>
-      <button class="btn" onclick="clearAll()" style="font-size:12px;padding:6px 12px">🗑 Clear all</button>
-    </div>
-    <div id="files-list"></div>
-  </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
-  <!-- ITEMS CARD -->
-  <div class="card" id="items-card" style="display:none">
-    <div class="card-header">
-      <h3>📋 Items to prepare — grouped by product + size</h3>
-      <span class="text-sm-muted" id="items-count"></span>
-    </div>
-    <div id="items-list"></div>
-  </div>
-
-  <!-- ACTIONS -->
-  <div class="actions" id="actions-row" style="display:none">
-    <button class="btn primary" id="btn-worker" onclick="generateWorkerPDF()">
-      🖨 Worker sheet PDF
-    </button>
-    <button class="btn" id="btn-slips" onclick="generateIndividualPDFs()">
-      📑 All individual slips PDF
-    </button>
-  </div>
-
-  <footer>Files are processed entirely in your browser — nothing is uploaded to any server.</footer>
-</main>
-
-<!-- PROGRESS OVERLAY -->
-<div id="progress-overlay">
-  <div class="progress-box">
-    <h4 id="progress-title">Processing…</h4>
-    <div class="progress-bar-outer">
-      <div class="progress-bar-inner" id="progress-bar"></div>
-    </div>
-    <div class="progress-label" id="progress-label"></div>
+    <script>
+      // ── Embedded Amiri font (Arabic-capable, subsetted) ──────────────────────
+      const AMIRI_B64 = "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AAcEZAGJ/vP//wA1/+YBPQLrAiYDzAAAAAcAZAC0AET//wA1/+YBPQFRAgYDzAAA//8ANf/mAT0C6wAnAGQAtABEAgYDzAAA//8ANf/mAT0CaAAnBF0AtAHQAgYDzAAA////rP8gAVgBIwAnA+//bgAAAAYEaXX2////rP8gAZQBIwAnA+//bgAAAAcEfQEa/9b///+s/yABWAJOACcD7/9uAAAABwBqAPL/y////6z/IAFYApEAJwPv/24AAAAPENsB6QXawAD///+s/yABWAKIACcD7/9uAAAABwCAAC/97////6z/IAFYAlAAJwPv/24AAAAHAGsA8v/L////rP8gAVgCCwAnA+//bgAAAAcEXQDIAXP///+s/yABWAJzACcD7/9uAAAABwReAMgBc///ADb/LgLUAZQCBgPxAAD////m/y4C1AGUAiYD8QAAAAcEcwBpAJL//wA2/y4C1AJHAiYD8QAAAAcAagDt/8T///+s/yABWAH1ACcD7/9uAAAABwRcAMgBc///ADb+AgLUAZQCJgPxAAAABwRoAXf+BP//ADb95ALUAZQCJgPxAAAABwRkAWX95///ADz/6QRQAcsCBg+qAAD//wA8/+kEUAO/ACcPvgFxAAAAJwBkAOABGAAGD7wAAAABAEEAAAGrAFoACwAAJTIHBwYjIyI3NzYzAZgTDToOGugTDToOGloNPw4NPw7//wA1/+YBPQFRAgYDzAAAAAL//QUhAfAG2QBFAEwAABMmJicmJicmNzc2FxYXFjc2NzYXFhc2Njc2NzYXFgcGBwYnBgcGJyYnBgcGBxYXFjY3NjY3NgcHBgcGBgcGJyYnJjc2NzYlJgcWFjc2aAECAgEBAgEEDBICBwoNGRYeCwYhCwITETsvGg4OEhw7S00WBSEgFgcHFBQqL0ress-label" id="progress-label"></div>
   </div>
 </div>
 
