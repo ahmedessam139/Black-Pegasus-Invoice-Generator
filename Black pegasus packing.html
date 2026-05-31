@@ -1,863 +1,1403 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" dir="ltr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Black Pegasus — Packing Tool</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --border: #e0ddd6;
-    --border-strong: #c8c5bc;
-    --text: #1a1916;
-    --text-muted: #6b6860;
-    --accent: #1a1916;
-    --accent-fg: #ffffff;
-    --info-bg: #e8f0fb;
-    --info-text: #1a4fa8;
-    --success-bg: #e6f4ea;
-    --success-text: #1a7a3a;
-    --danger-bg: #fdecea;
-    --danger-text: #b91c1c;
-    --warning-bg: #fff7e6;
-    --warning-text: #92400e;
-    --radius: 10px;
-    --radius-sm: 6px;
-  }
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.5;
-  }
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    height: 56px;
-  }
-  header .logo {
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  header .sep { color: var(--border-strong); font-size: 20px; }
-  header .subtitle { font-size: 13px; color: var(--text-muted); }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Black Pegasus — Packing Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #f5f4f0;
+        --surface: #ffffff;
+        --border: #e0ddd6;
+        --border-strong: #c8c5bc;
+        --text: #1a1916;
+        --text-muted: #6b6860;
+        --accent: #1a1916;
+        --accent-fg: #ffffff;
+        --info-bg: #e8f0fb;
+        --info-text: #1a4fa8;
+        --success-bg: #e6f4ea;
+        --success-text: #1a7a3a;
+        --danger-bg: #fdecea;
+        --danger-text: #b91c1c;
+        --warning-bg: #fff7e6;
+        --warning-text: #92400e;
+        --radius: 10px;
+        --radius-sm: 6px;
+      }
+      body {
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      header {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 0 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        height: 56px;
+      }
+      header .logo {
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      header .sep {
+        color: var(--border-strong);
+        font-size: 20px;
+      }
+      header .subtitle {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
 
-  main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+      }
 
-  /* DROP ZONE */
-  #drop-zone {
-    border: 2px dashed var(--border-strong);
-    border-radius: var(--radius);
-    padding: 3rem 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-    background: var(--surface);
-  }
-  #drop-zone:hover, #drop-zone.dragover {
-    background: var(--info-bg);
-    border-color: var(--info-text);
-  }
-  #drop-zone input[type=file] { display: none; }
-  #drop-zone .icon { font-size: 40px; margin-bottom: 12px; }
-  #drop-zone h2 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
-  #drop-zone p { font-size: 13px; color: var(--text-muted); }
+      /* DROP ZONE */
+      #drop-zone {
+        border: 2px dashed var(--border-strong);
+        border-radius: var(--radius);
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          border-color 0.15s;
+        background: var(--surface);
+      }
+      #drop-zone:hover,
+      #drop-zone.dragover {
+        background: var(--info-bg);
+        border-color: var(--info-text);
+      }
+      #drop-zone input[type="file"] {
+        display: none;
+      }
+      #drop-zone .icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+      }
+      #drop-zone h2 {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      #drop-zone p {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
 
-  /* STATUS */
-  #status-bar {
-    display: none;
-    margin-top: 1rem;
-    padding: 10px 14px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-  }
-  #status-bar.info { background: var(--info-bg); color: var(--info-text); }
-  #status-bar.err  { background: var(--danger-bg); color: var(--danger-text); }
-  #status-bar.ok   { background: var(--success-bg); color: var(--success-text); }
+      /* STATUS */
+      #status-bar {
+        display: none;
+        margin-top: 1rem;
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+      }
+      #status-bar.info {
+        background: var(--info-bg);
+        color: var(--info-text);
+      }
+      #status-bar.err {
+        background: var(--danger-bg);
+        color: var(--danger-text);
+      }
+      #status-bar.ok {
+        background: var(--success-bg);
+        color: var(--success-text);
+      }
 
-  /* METRICS */
-  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 1.5rem; }
-  .metric {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.1rem 1.25rem;
-  }
-  .metric-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .metric-value { font-size: 28px; font-weight: 700; }
+      /* METRICS */
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 1.5rem;
+      }
+      .metric {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.1rem 1.25rem;
+      }
+      .metric-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .metric-value {
+        font-size: 28px;
+        font-weight: 700;
+      }
 
-  /* CARDS */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin-top: 1.5rem;
-    overflow: hidden;
-  }
-  .card-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .card-header h3 { font-size: 14px; font-weight: 600; }
+      /* CARDS */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-top: 1.5rem;
+        overflow: hidden;
+      }
+      .card-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .card-header h3 {
+        font-size: 14px;
+        font-weight: 600;
+      }
 
-  /* SLIP LIST */
-  .slip-row {
-    display: grid;
-    grid-template-columns: 1fr 160px 1fr 60px 28px;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 16px;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-  .slip-row:last-child { border-bottom: none; }
-  .slip-filename { color: var(--text-muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .slip-id { font-family: monospace; font-size: 12px; color: var(--text-muted); }
-  .badge {
-    display: inline-block;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 99px;
-    font-weight: 600;
-    background: var(--success-bg);
-    color: var(--success-text);
-  }
-  .badge.warn { background: var(--warning-bg); color: var(--warning-text); }
-  .remove-btn {
-    background: none; border: none; cursor: pointer;
-    color: var(--text-muted); font-size: 18px; line-height: 1;
-    padding: 0; width: 24px; height: 24px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.1s;
-  }
-  .remove-btn:hover { background: var(--danger-bg); color: var(--danger-text); }
+      /* SLIP LIST */
+      .slip-row {
+        display: grid;
+        grid-template-columns: 1fr 160px 1fr 60px 28px;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 16px;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+      }
+      .slip-row:last-child {
+        border-bottom: none;
+      }
+      .slip-filename {
+        color: var(--text-muted);
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .slip-id {
+        font-family: monospace;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .badge {
+        display: inline-block;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-weight: 600;
+        background: var(--success-bg);
+        color: var(--success-text);
+      }
+      .badge.warn {
+        background: var(--warning-bg);
+        color: var(--warning-text);
+      }
+      .remove-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 18px;
+        line-height: 1;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.1s;
+      }
+      .remove-btn:hover {
+        background: var(--danger-bg);
+        color: var(--danger-text);
+      }
 
-  /* ITEM LIST */
-  .item-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 16px;
-    font-size: 14px;
-  }
-  .item-row + .item-separator { margin-top: 0; }
-  .item-separator {
-    height: 2px;
-    background: linear-gradient(to right, transparent, var(--border-strong), transparent);
-    margin: 0 14px 14px;
-    opacity: 0.8;
-  }
-  .qty-bubble {
-    min-width: 40px; height: 40px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: var(--accent-fg);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; font-weight: 700;
-    flex-shrink: 0;
-  }
-  .item-name { font-weight: 600; flex: 1; }
-  .item-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-  .size-tag {
-    font-size: 12px; padding: 3px 9px;
-    border-radius: var(--radius-sm);
-    background: var(--bg);
-    border: 1px solid var(--border-strong);
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
-  .code-tag { font-family: monospace; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+      /* ITEM LIST */
+      .item-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 16px;
+        font-size: 14px;
+      }
+      .item-group-parent {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px 10px;
+        background: #fbfbfb;
+        border: 1px solid var(--border);
+        border-radius: 12px 12px 0 0;
+        margin-top: 18px;
+      }
+      .item-child-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px 10px 40px;
+        border-left: 3px solid var(--border-strong);
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+      }
+      .item-group-parent + .item-child-row {
+        border-top: 1px solid var(--border);
+      }
+      .item-row + .item-separator,
+      .item-group-parent + .item-separator {
+        margin-top: 0;
+      }
+      .item-separator {
+        height: 2px;
+        background: linear-gradient(
+          to right,
+          transparent,
+          var(--border-strong),
+          transparent
+        );
+        margin: 0 14px 20px;
+        opacity: 0.9;
+      }
+      .qty-bubble {
+        min-width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: var(--accent-fg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .item-name {
+        font-weight: 700;
+        flex: 1;
+      }
+      .item-sub {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+      .group-total {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+        white-space: nowrap;
+      }
+      .child-meta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+      .child-meta span {
+        white-space: nowrap;
+      }
+      .size-tag {
+        font-size: 12px;
+        padding: 3px 9px;
+        border-radius: var(--radius-sm);
+        background: var(--bg);
+        border: 1px solid var(--border-strong);
+        color: var(--text-muted);
+        white-space: nowrap;
+      }
+      .code-tag {
+        font-family: monospace;
+        font-size: 12px;
+        color: var(--text-muted);
+        white-space: nowrap;
+      }
 
-  /* ACTIONS */
-  .actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 1.5rem;
-  }
-  button.btn {
-    padding: 10px 20px;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1.5px solid var(--border-strong);
-    background: var(--surface);
-    color: var(--text);
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    transition: background 0.12s;
-  }
-  button.btn:hover { background: var(--bg); }
-  button.btn.primary {
-    background: var(--accent);
-    color: var(--accent-fg);
-    border-color: var(--accent);
-  }
-  button.btn.primary:hover { opacity: 0.88; }
-  button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+      /* ACTIONS */
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 1.5rem;
+      }
+      button.btn {
+        padding: 10px 20px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1.5px solid var(--border-strong);
+        background: var(--surface);
+        color: var(--text);
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: background 0.12s;
+      }
+      button.btn:hover {
+        background: var(--bg);
+      }
+      button.btn.primary {
+        background: var(--accent);
+        color: var(--accent-fg);
+        border-color: var(--accent);
+      }
+      button.btn.primary:hover {
+        opacity: 0.88;
+      }
+      button.btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
 
-  .text-sm-muted { font-size: 12px; color: var(--text-muted); }
+      .text-sm-muted {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
 
-  footer {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 12px;
-    margin-top: 3rem;
-    padding-bottom: 2rem;
-  }
+      footer {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 12px;
+        margin-top: 3rem;
+        padding-bottom: 2rem;
+      }
 
-  /* progress overlay */
-  #progress-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-  #progress-overlay.show { display: flex; }
-  .progress-box {
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: 2rem 2.5rem;
-    text-align: center;
-    min-width: 280px;
-  }
-  .progress-box h4 { font-size: 15px; margin-bottom: 1rem; }
-  .progress-bar-outer {
-    height: 6px; background: var(--border);
-    border-radius: 99px; overflow: hidden;
-  }
-  .progress-bar-inner {
-    height: 100%; background: var(--accent);
-    border-radius: 99px;
-    transition: width 0.2s;
-    width: 0%;
-  }
-  .progress-label { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+      /* progress overlay */
+      #progress-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        z-index: 100;
+        align-items: center;
+        justify-content: center;
+      }
+      #progress-overlay.show {
+        display: flex;
+      }
+      .progress-box {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem 2.5rem;
+        text-align: center;
+        min-width: 280px;
+      }
+      .progress-box h4 {
+        font-size: 15px;
+        margin-bottom: 1rem;
+      }
+      .progress-bar-outer {
+        height: 6px;
+        background: var(--border);
+        border-radius: 99px;
+        overflow: hidden;
+      }
+      .progress-bar-inner {
+        height: 100%;
+        background: var(--accent);
+        border-radius: 99px;
+        transition: width 0.2s;
+        width: 0%;
+      }
+      .progress-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 8px;
+      }
 
-  @media (max-width: 600px) {
-    main { padding: 1rem; }
-    .metrics { grid-template-columns: 1fr 1fr; }
-    .slip-row { grid-template-columns: 1fr 100px 32px; }
-    .slip-row .slip-id, .slip-row .slip-name { display: none; }
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <span class="logo">Black Pegasus</span>
-  <span class="sep">|</span>
-  <span class="subtitle">Packing Slip Aggregator</span>
-</header>
-
-<main>
-
-  <!-- DROP ZONE -->
-  <div id="drop-zone" onclick="document.getElementById('file-input').click()" role="button" tabindex="0" aria-label="Upload packing slip PDFs">
-    <input type="file" id="file-input" multiple accept=".pdf">
-    <div class="icon">📦</div>
-    <h2>Drop packing slip PDFs here</h2>
-    <p>Or click to select — you can upload multiple files at once</p>
-  </div>
-
-  <div id="status-bar"></div>
-
-  <!-- METRICS -->
-  <div class="metrics" id="metrics" style="display:none">
-    <div class="metric">
-      <div class="metric-label">Orders loaded</div>
-      <div class="metric-value" id="m-orders">0</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Unique products</div>
-      <div class="metric-value" id="m-products">0</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Total items</div>
-      <div class="metric-value" id="m-items">0</div>
-    </div>
-  </div>
-
-  <!-- FILES CARD -->
-  <div class="card" id="files-card" style="display:none">
-    <div class="card-header">
-      <h3>📄 Loaded slips</h3>
-      <button class="btn" onclick="clearAll()" style="font-size:12px;padding:6px 12px">🗑 Clear all</button>
-    </div>
-    <div id="files-list"></div>
-  </div>
-
-  <!-- ITEMS CARD -->
-  <div class="card" id="items-card" style="display:none">
-    <div class="card-header">
-      <h3>📋 Items to prepare — grouped by product + size</h3>
-      <span class="text-sm-muted" id="items-count"></span>
-    </div>
-    <div id="items-list"></div>
-  </div>
-
-  <!-- ACTIONS -->
-  <div class="actions" id="actions-row" style="display:none">
-    <button class="btn primary" id="btn-worker" onclick="generateWorkerPDF()">
-      🖨 Worker sheet PDF
-    </button>
-    <button class="btn" id="btn-slips" onclick="generateIndividualPDFs()">
-      📑 All individual slips PDF
-    </button>
-  </div>
-
-  <footer>Files are processed entirely in your browser — nothing is uploaded to any server.</footer>
-</main>
-
-<!-- PROGRESS OVERLAY -->
-<div id="progress-overlay">
-  <div class="progress-box">
-    <h4 id="progress-title">Processing…</h4>
-    <div class="progress-bar-outer">
-      <div class="progress-bar-inner" id="progress-bar"></div>
-    </div>
-    <div class="progress-label" id="progress-label"></div>
-  </div>
-</div>
-
-<script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-// ── State ──────────────────────────────────────────────────────────────────
-let orders = [];
-
-// ── UI Helpers ─────────────────────────────────────────────────────────────
-function setStatus(msg, type = 'info') {
-  const sb = document.getElementById('status-bar');
-  sb.textContent = msg;
-  sb.className = type;
-  sb.style.display = msg ? 'block' : 'none';
-}
-
-function showProgress(title, pct, label) {
-  document.getElementById('progress-overlay').classList.add('show');
-  document.getElementById('progress-title').textContent = title;
-  document.getElementById('progress-bar').style.width = pct + '%';
-  document.getElementById('progress-label').textContent = label;
-}
-
-function hideProgress() {
-  document.getElementById('progress-overlay').classList.remove('show');
-}
-
-// ── Drag & Drop ────────────────────────────────────────────────────────────
-const dz = document.getElementById('drop-zone');
-const fi = document.getElementById('file-input');
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-dz.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fi.click(); });
-fi.addEventListener('change', e => handleFiles(e.target.files));
-
-// ── File Handling ──────────────────────────────────────────────────────────
-async function handleFiles(files) {
-  const arr = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
-  if (!arr.length) { setStatus('No PDF files found in selection.', 'err'); return; }
-
-  setStatus(`Reading ${arr.length} file(s)…`, 'info');
-  let loaded = 0, skipped = 0;
-
-  for (let i = 0; i < arr.length; i++) {
-    const file = arr[i];
-    showProgress('Parsing packing slips…', Math.round(((i + 1) / arr.length) * 100), `${file.name}`);
-    try {
-      const order = await parsePDF(file);
-      if (order) {
-        const exists = orders.find(o => o.orderId === order.orderId);
-        if (!exists) {
-          orders.push(order);
-          loaded++;
-        } else {
-          skipped++;
+      @media (max-width: 600px) {
+        main {
+          padding: 1rem;
+        }
+        .metrics {
+          grid-template-columns: 1fr 1fr;
+        }
+        .slip-row {
+          grid-template-columns: 1fr 100px 32px;
+        }
+        .slip-row .slip-id,
+        .slip-row .slip-name {
+          display: none;
         }
       }
-    } catch (e) {
-      console.error('Error parsing', file.name, e);
-    }
-  }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="logo">Black Pegasus</span>
+      <span class="sep">|</span>
+      <span class="subtitle">Packing Slip Aggregator</span>
+    </header>
 
-  fi.value = '';
-  hideProgress();
-  render();
+    <main>
+      <!-- DROP ZONE -->
+      <div
+        id="drop-zone"
+        onclick="document.getElementById('file-input').click()"
+        role="button"
+        tabindex="0"
+        aria-label="Upload packing slip PDFs"
+      >
+        <input type="file" id="file-input" multiple accept=".pdf" />
+        <div class="icon">📦</div>
+        <h2>Drop packing slip PDFs here</h2>
+        <p>Or click to select — you can upload multiple files at once</p>
+      </div>
 
-  const msgs = [];
-  if (loaded) msgs.push(`${loaded} slip(s) loaded`);
-  if (skipped) msgs.push(`${skipped} duplicate(s) skipped`);
-  setStatus(msgs.join(', ') + '. Total: ' + orders.length + ' orders.', 'ok');
-}
+      <div id="status-bar"></div>
 
-// ── PDF Parsing ────────────────────────────────────────────────────────────
-// Strategy: use pdf.js word positions (x coordinate) to reconstruct table columns.
-// Column x-ranges (in PDF points, page width ~595):
-//   #    : x < 70
-//   Name : 70 <= x < 280
-//   Qty  : 280 <= x < 370
-//   Size : 370 <= x < 480
-//   Code : x >= 480
+      <!-- METRICS -->
+      <div class="metrics" id="metrics" style="display: none">
+        <div class="metric">
+          <div class="metric-label">Orders loaded</div>
+          <div class="metric-value" id="m-orders">0</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Unique products</div>
+          <div class="metric-value" id="m-products">0</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Total items</div>
+          <div class="metric-value" id="m-items">0</div>
+        </div>
+      </div>
 
-async function parsePDF(file) {
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      <!-- FILES CARD -->
+      <div class="card" id="files-card" style="display: none">
+        <div class="card-header">
+          <h3>📄 Loaded slips</h3>
+          <button
+            class="btn"
+            onclick="clearAll()"
+            style="font-size: 12px; padding: 6px 12px"
+          >
+            🗑 Clear all
+          </button>
+        </div>
+        <div id="files-list"></div>
+      </div>
 
-  let allWords = [];
-  for (let p = 1; p <= pdf.numPages; p++) {
-    const page = await pdf.getPage(p);
-    const vp = page.getViewport({ scale: 1 });
-    const tc = await page.getTextContent();
-    // Normalise y: pdf.js gives y from bottom; convert to top-down
-    const pageH = vp.height;
-    for (const item of tc.items) {
-      if (!item.str || !item.str.trim()) continue;
-      const tx = item.transform[4];
-      const ty = pageH - item.transform[5];
-      allWords.push({ text: item.str.trim(), x: tx, y: ty });
-    }
-  }
+      <!-- ITEMS CARD -->
+      <div class="card" id="items-card" style="display: none">
+        <div class="card-header">
+          <h3>📋 Items to prepare — grouped by product + size</h3>
+          <span class="text-sm-muted" id="items-count"></span>
+        </div>
+        <div id="items-list"></div>
+      </div>
 
-  // ── Extract Order ID ──────────────────────────────────────────────────────
-  const fullText = allWords.map(w => w.text).join(' ');
-  const orderIdMatch = fullText.match(/Order\s+ID[:\s]+([^\s]+)/i);
-  const orderId = orderIdMatch ? orderIdMatch[1] : ('ORDER-' + Date.now());
+      <!-- ACTIONS -->
+      <div class="actions" id="actions-row" style="display: none">
+        <button
+          class="btn primary"
+          id="btn-worker"
+          onclick="generateWorkerPDF()"
+        >
+          🖨 Worker sheet PDF
+        </button>
+        <button class="btn" id="btn-slips" onclick="generateIndividualPDFs()">
+          📑 All individual slips PDF
+        </button>
+      </div>
 
-  // ── Extract customer fields by looking for label words then value words on same row ──
-  function getValueAfterLabel(labelPattern, allWords) {
-    const labelWords = allWords.filter(w => labelPattern.test(w.text));
-    if (!labelWords.length) return '';
-    const labelY = labelWords[0].y;
-    const labelX = labelWords[0].x;
-    // Collect words on same row (±4px) that are to the right of the label
-    const rowWords = allWords
-      .filter(w => Math.abs(w.y - labelY) < 4 && w.x > labelX + 5)
-      .sort((a, b) => a.x - b.x);
-    return rowWords.map(w => w.text).join(' ').trim();
-  }
+      <footer>
+        Files are processed entirely in your browser — nothing is uploaded to
+        any server.
+      </footer>
+    </main>
 
-  const customerName = getValueAfterLabel(/^Name:?$/i, allWords);
-  const phone = getValueAfterLabel(/^Phone:?$/i, allWords);
+    <!-- PROGRESS OVERLAY -->
+    <div id="progress-overlay">
+      <div class="progress-box">
+        <h4 id="progress-title">Processing…</h4>
+        <div class="progress-bar-outer">
+          <div class="progress-bar-inner" id="progress-bar"></div>
+        </div>
+        <div class="progress-label" id="progress-label"></div>
+      </div>
+    </div>
 
-  // City: value is on the SAME row but far to the right (Arabic RTL layout)
-  const cityLabelWords = allWords.filter(w => /^City:?$/i.test(w.text));
-  let city = '';
-  if (cityLabelWords.length) {
-    const cityY = cityLabelWords[0].y;
-    // The city name appears ~10–12 px lower (next line), on the right side of page
-    // OR on same row. Let's grab anything within 15px vertically after City: label
-    const cityRowWords = allWords
-      .filter(w => w.y >= cityY - 2 && w.y <= cityY + 15 && w.x > 200)
-      .sort((a, b) => a.x - b.x);
-    city = cityRowWords.map(w => w.text).join(' ').replace(/^[-\s]+/, '').trim();
-  }
+    <script>
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-  // Notes: collect all words on Notes row that are NOT "Notes:"
-  const notesLabelWords = allWords.filter(w => /^Notes:?$/i.test(w.text));
-  let notes = '';
-  if (notesLabelWords.length) {
-    const notesY = notesLabelWords[0].y;
-    const notesRowWords = allWords
-      .filter(w => w.y >= notesY - 2 && w.y <= notesY + 15 && !/^Notes:?$/i.test(w.text))
-      .sort((a, b) => a.x - b.x);
-    notes = notesRowWords.map(w => w.text).join(' ').trim();
-  }
+      // ── State ──────────────────────────────────────────────────────────────────
+      let orders = [];
 
-  // ── Find "Order Items" header row ─────────────────────────────────────────
-  // Look for word "#" which is the table header — items start after it
-  const hashWord = allWords.find(w => w.text === '#');
-  if (!hashWord) return { orderId, customerName, phone, city, notes, items: [], fileName: file.name };
-
-  const headerY = hashWord.y;
-
-  // ── Determine column X boundaries from header row ─────────────────────────
-  // Header words: # | Item Name | Qty | Size | Code
-  const headerWords = allWords.filter(w => Math.abs(w.y - headerY) < 6);
-  // Find x positions of each column header
-  const colHash = headerWords.find(w => w.text === '#');
-  const colQty  = headerWords.find(w => /^Qty$/i.test(w.text));
-  const colSize = headerWords.find(w => /^Size$/i.test(w.text));
-  const colCode = headerWords.find(w => /^Code$/i.test(w.text));
-
-  // Fallback x values
-  const xHash = colHash ? colHash.x : 55;
-  const xQty  = colQty  ? colQty.x  : 310;
-  const xSize = colSize ? colSize.x  : 390;
-  const xCode = colCode ? colCode.x  : 480;
-
-  const xNameStart = xHash + 15;  // name starts just after #
-
-  // ── Collect item rows (below header, above TOTAL) ─────────────────────────
-  const totalWord = allWords.find(w => w.text === 'TOTAL' && w.y > headerY);
-  const bottomY = totalWord ? totalWord.y : 9999;
-
-  const itemWords = allWords.filter(w => w.y > headerY + 5 && w.y < bottomY - 2);
-
-  // Group words by row (cluster by y ±5px)
-  const rows = [];
-  for (const word of itemWords) {
-    const existingRow = rows.find(r => Math.abs(r.y - word.y) < 5);
-    if (existingRow) {
-      existingRow.words.push(word);
-    } else {
-      rows.push({ y: word.y, words: [word] });
-    }
-  }
-  rows.sort((a, b) => a.y - b.y);
-
-  // ── Parse each row into # / name / qty / size / code ─────────────────────
-  const items = [];
-  for (const row of rows) {
-    const ws = row.words.sort((a, b) => a.x - b.x);
-
-    // A valid item row must have a # column word that is a small integer
-    const numWord = ws.find(w => w.x < xNameStart && /^\d+$/.test(w.text));
-    if (!numWord) continue;
-    const num = parseInt(numWord.text);
-
-    // Name: words between xNameStart and xQty-10
-    const nameWords = ws.filter(w => w.x >= xNameStart && w.x < xQty - 5).sort((a,b) => a.x - b.x);
-    const name = nameWords.map(w => w.text).join(' ').trim();
-    if (!name) continue;
-
-    // Qty: words around xQty column (±30px tolerance)
-    const qtyWords = ws.filter(w => w.x >= xQty - 20 && w.x < xSize - 10);
-    const qtyStr = qtyWords.map(w => w.text).join('').trim();
-    const qty = parseInt(qtyStr) || 1;
-
-    // Code: rightmost column — must match BP-style product codes (letters+digits)
-    const codeWords = ws.filter(w => w.x >= xCode - 10).sort((a,b) => a.x - b.x);
-    const code = codeWords.map(w => w.text).join('').trim();
-
-    // Size: everything between qty and code columns.
-    // Use a wide net (xSize - 40) to catch values like "tester-5ml" whose
-    // first word may start left of the nominal Size column.
-    const sizeWords = ws
-      .filter(w => w.x >= xQty + 15 && w.x < xCode - 5)
-      .sort((a, b) => a.x - b.x);
-    let size = sizeWords.map(w => w.text).join('').trim();
-
-    // Normalise common variants:
-    //   "ml100"        → "100ml"
-    //   "100 ml"       → "100ml"
-    //   "tester-5ml"   → kept as-is (already correct)
-    //   "tester- 5ml"  → "tester-5ml"
-    size = size
-      .replace(/^ml(\d+)$/i, '$1ml')          // ml100 → 100ml
-      .replace(/^(\d+)\s+ml$/i, '$1ml')        // 100 ml → 100ml
-      .replace(/tester[-\s]+(\d+\s*ml)/i, 'tester-$1') // tester- 5ml → tester-5ml
-      .trim();
-
-    if (name && code) {
-      items.push({ num, name, qty, size, code });
-    }
-  }
-
-  return { orderId, customerName, phone, city, notes, items, fileName: file.name };
-}
-
-// ── Aggregation ────────────────────────────────────────────────────────────
-function getAggregated() {
-  const map = {};
-  for (const order of orders) {
-    for (const item of order.items) {
-      const key = item.code + '__' + item.size;
-      if (!map[key]) {
-        map[key] = { name: item.name, code: item.code, size: item.size, totalQty: 0, orderIds: [] };
+      // ── UI Helpers ─────────────────────────────────────────────────────────────
+      function setStatus(msg, type = "info") {
+        const sb = document.getElementById("status-bar");
+        sb.textContent = msg;
+        sb.className = type;
+        sb.style.display = msg ? "block" : "none";
       }
-      map[key].totalQty += item.qty;
-      if (!map[key].orderIds.includes(order.orderId)) map[key].orderIds.push(order.orderId);
-    }
-  }
-  return Object.values(map).sort((a, b) => {
-    const nameComparison = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
-    return nameComparison !== 0 ? nameComparison : b.totalQty - a.totalQty;
-  });
-}
 
-// ── Render UI ──────────────────────────────────────────────────────────────
-function render() {
-  const agg = getAggregated();
-  const totalItems = agg.reduce((s, i) => s + i.totalQty, 0);
-  const hasData = orders.length > 0;
+      function showProgress(title, pct, label) {
+        document.getElementById("progress-overlay").classList.add("show");
+        document.getElementById("progress-title").textContent = title;
+        document.getElementById("progress-bar").style.width = pct + "%";
+        document.getElementById("progress-label").textContent = label;
+      }
 
-  document.getElementById('metrics').style.display = hasData ? 'grid' : 'none';
-  document.getElementById('m-orders').textContent = orders.length;
-  document.getElementById('m-products').textContent = agg.length;
-  document.getElementById('m-items').textContent = totalItems;
+      function hideProgress() {
+        document.getElementById("progress-overlay").classList.remove("show");
+      }
 
-  // Files list
-  const fc = document.getElementById('files-card');
-  fc.style.display = hasData ? 'block' : 'none';
-  document.getElementById('files-list').innerHTML = orders.map(o => `
+      // ── Drag & Drop ────────────────────────────────────────────────────────────
+      const dz = document.getElementById("drop-zone");
+      const fi = document.getElementById("file-input");
+      dz.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dz.classList.add("dragover");
+      });
+      dz.addEventListener("dragleave", () => dz.classList.remove("dragover"));
+      dz.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dz.classList.remove("dragover");
+        handleFiles(e.dataTransfer.files);
+      });
+      dz.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") fi.click();
+      });
+      fi.addEventListener("change", (e) => handleFiles(e.target.files));
+
+      // ── File Handling ──────────────────────────────────────────────────────────
+      async function handleFiles(files) {
+        const arr = Array.from(files).filter((f) =>
+          f.name.toLowerCase().endsWith(".pdf"),
+        );
+        if (!arr.length) {
+          setStatus("No PDF files found in selection.", "err");
+          return;
+        }
+
+        setStatus(`Reading ${arr.length} file(s)…`, "info");
+        let loaded = 0,
+          skipped = 0;
+
+        for (let i = 0; i < arr.length; i++) {
+          const file = arr[i];
+          showProgress(
+            "Parsing packing slips…",
+            Math.round(((i + 1) / arr.length) * 100),
+            `${file.name}`,
+          );
+          try {
+            const order = await parsePDF(file);
+            if (order) {
+              const exists = orders.find((o) => o.orderId === order.orderId);
+              if (!exists) {
+                orders.push(order);
+                loaded++;
+              } else {
+                skipped++;
+              }
+            }
+          } catch (e) {
+            console.error("Error parsing", file.name, e);
+          }
+        }
+
+        fi.value = "";
+        hideProgress();
+        render();
+
+        const msgs = [];
+        if (loaded) msgs.push(`${loaded} slip(s) loaded`);
+        if (skipped) msgs.push(`${skipped} duplicate(s) skipped`);
+        setStatus(
+          msgs.join(", ") + ". Total: " + orders.length + " orders.",
+          "ok",
+        );
+      }
+
+      // ── PDF Parsing ────────────────────────────────────────────────────────────
+      // Strategy: use pdf.js word positions (x coordinate) to reconstruct table columns.
+      // Column x-ranges (in PDF points, page width ~595):
+      //   #    : x < 70
+      //   Name : 70 <= x < 280
+      //   Qty  : 280 <= x < 370
+      //   Size : 370 <= x < 480
+      //   Code : x >= 480
+
+      async function parsePDF(file) {
+        const buf = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+
+        let allWords = [];
+        for (let p = 1; p <= pdf.numPages; p++) {
+          const page = await pdf.getPage(p);
+          const vp = page.getViewport({ scale: 1 });
+          const tc = await page.getTextContent();
+          // Normalise y: pdf.js gives y from bottom; convert to top-down
+          const pageH = vp.height;
+          for (const item of tc.items) {
+            if (!item.str || !item.str.trim()) continue;
+            const tx = item.transform[4];
+            const ty = pageH - item.transform[5];
+            allWords.push({ text: item.str.trim(), x: tx, y: ty });
+          }
+        }
+
+        // ── Extract Order ID ──────────────────────────────────────────────────────
+        const fullText = allWords.map((w) => w.text).join(" ");
+        const orderIdMatch = fullText.match(/Order\s+ID[:\s]+([^\s]+)/i);
+        const orderId = orderIdMatch ? orderIdMatch[1] : "ORDER-" + Date.now();
+
+        // ── Extract customer fields by looking for label words then value words on same row ──
+        function getValueAfterLabel(labelPattern, allWords) {
+          const labelWords = allWords.filter((w) => labelPattern.test(w.text));
+          if (!labelWords.length) return "";
+          const labelY = labelWords[0].y;
+          const labelX = labelWords[0].x;
+          // Collect words on same row (±4px) that are to the right of the label
+          const rowWords = allWords
+            .filter((w) => Math.abs(w.y - labelY) < 4 && w.x > labelX + 5)
+            .sort((a, b) => a.x - b.x);
+          return rowWords
+            .map((w) => w.text)
+            .join(" ")
+            .trim();
+        }
+
+        const customerName = getValueAfterLabel(/^Name:?$/i, allWords);
+        const phone = getValueAfterLabel(/^Phone:?$/i, allWords);
+
+        // City: value is on the SAME row but far to the right (Arabic RTL layout)
+        const cityLabelWords = allWords.filter((w) => /^City:?$/i.test(w.text));
+        let city = "";
+        if (cityLabelWords.length) {
+          const cityY = cityLabelWords[0].y;
+          // The city name appears ~10–12 px lower (next line), on the right side of page
+          // OR on same row. Let's grab anything within 15px vertically after City: label
+          const cityRowWords = allWords
+            .filter((w) => w.y >= cityY - 2 && w.y <= cityY + 15 && w.x > 200)
+            .sort((a, b) => a.x - b.x);
+          city = cityRowWords
+            .map((w) => w.text)
+            .join(" ")
+            .replace(/^[-\s]+/, "")
+            .trim();
+        }
+
+        // Notes: collect all words on Notes row that are NOT "Notes:"
+        const notesLabelWords = allWords.filter((w) =>
+          /^Notes:?$/i.test(w.text),
+        );
+        let notes = "";
+        if (notesLabelWords.length) {
+          const notesY = notesLabelWords[0].y;
+          const notesRowWords = allWords
+            .filter(
+              (w) =>
+                w.y >= notesY - 2 &&
+                w.y <= notesY + 15 &&
+                !/^Notes:?$/i.test(w.text),
+            )
+            .sort((a, b) => a.x - b.x);
+          notes = notesRowWords
+            .map((w) => w.text)
+            .join(" ")
+            .trim();
+        }
+
+        // ── Find "Order Items" header row ─────────────────────────────────────────
+        // Look for word "#" which is the table header — items start after it
+        const hashWord = allWords.find((w) => w.text === "#");
+        if (!hashWord)
+          return {
+            orderId,
+            customerName,
+            phone,
+            city,
+            notes,
+            items: [],
+            fileName: file.name,
+          };
+
+        const headerY = hashWord.y;
+
+        // ── Determine column X boundaries from header row ─────────────────────────
+        // Header words: # | Item Name | Qty | Size | Code
+        const headerWords = allWords.filter((w) => Math.abs(w.y - headerY) < 6);
+        // Find x positions of each column header
+        const colHash = headerWords.find((w) => w.text === "#");
+        const colQty = headerWords.find((w) => /^Qty$/i.test(w.text));
+        const colSize = headerWords.find((w) => /^Size$/i.test(w.text));
+        const colCode = headerWords.find((w) => /^Code$/i.test(w.text));
+
+        // Fallback x values
+        const xHash = colHash ? colHash.x : 55;
+        const xQty = colQty ? colQty.x : 310;
+        const xSize = colSize ? colSize.x : 390;
+        const xCode = colCode ? colCode.x : 480;
+
+        const xNameStart = xHash + 15; // name starts just after #
+
+        // ── Collect item rows (below header, above TOTAL) ─────────────────────────
+        const totalWord = allWords.find(
+          (w) => w.text === "TOTAL" && w.y > headerY,
+        );
+        const bottomY = totalWord ? totalWord.y : 9999;
+
+        const itemWords = allWords.filter(
+          (w) => w.y > headerY + 5 && w.y < bottomY - 2,
+        );
+
+        // Group words by row (cluster by y ±5px)
+        const rows = [];
+        for (const word of itemWords) {
+          const existingRow = rows.find((r) => Math.abs(r.y - word.y) < 5);
+          if (existingRow) {
+            existingRow.words.push(word);
+          } else {
+            rows.push({ y: word.y, words: [word] });
+          }
+        }
+        rows.sort((a, b) => a.y - b.y);
+
+        // ── Parse each row into # / name / qty / size / code ─────────────────────
+        const items = [];
+        for (const row of rows) {
+          const ws = row.words.sort((a, b) => a.x - b.x);
+
+          // A valid item row must have a # column word that is a small integer
+          const numWord = ws.find(
+            (w) => w.x < xNameStart && /^\d+$/.test(w.text),
+          );
+          if (!numWord) continue;
+          const num = parseInt(numWord.text);
+
+          // Name: words between xNameStart and xQty-10
+          const nameWords = ws
+            .filter((w) => w.x >= xNameStart && w.x < xQty - 5)
+            .sort((a, b) => a.x - b.x);
+          const name = nameWords
+            .map((w) => w.text)
+            .join(" ")
+            .trim();
+          if (!name) continue;
+
+          // Qty: words around xQty column (±30px tolerance)
+          const qtyWords = ws.filter(
+            (w) => w.x >= xQty - 20 && w.x < xSize - 10,
+          );
+          const qtyStr = qtyWords
+            .map((w) => w.text)
+            .join("")
+            .trim();
+          const qty = parseInt(qtyStr) || 1;
+
+          // Code: rightmost column — must match BP-style product codes (letters+digits)
+          const codeWords = ws
+            .filter((w) => w.x >= xCode - 10)
+            .sort((a, b) => a.x - b.x);
+          const code = codeWords
+            .map((w) => w.text)
+            .join("")
+            .trim();
+
+          // Size: everything between qty and code columns.
+          // Use a wide net (xSize - 40) to catch values like "tester-5ml" whose
+          // first word may start left of the nominal Size column.
+          const sizeWords = ws
+            .filter((w) => w.x >= xQty + 15 && w.x < xCode - 5)
+            .sort((a, b) => a.x - b.x);
+          let size = sizeWords
+            .map((w) => w.text)
+            .join("")
+            .trim();
+
+          // Normalise common variants:
+          //   "ml100"        → "100ml"
+          //   "100 ml"       → "100ml"
+          //   "tester-5ml"   → kept as-is (already correct)
+          //   "tester- 5ml"  → "tester-5ml"
+          size = size
+            .replace(/^ml(\d+)$/i, "$1ml") // ml100 → 100ml
+            .replace(/^(\d+)\s+ml$/i, "$1ml") // 100 ml → 100ml
+            .replace(/tester[-\s]+(\d+\s*ml)/i, "tester-$1") // tester- 5ml → tester-5ml
+            .trim();
+
+          if (name && code) {
+            items.push({ num, name, qty, size, code });
+          }
+        }
+
+        return {
+          orderId,
+          customerName,
+          phone,
+          city,
+          notes,
+          items,
+          fileName: file.name,
+        };
+      }
+
+      // ── Aggregation ────────────────────────────────────────────────────────────
+      function getAggregated() {
+        const map = {};
+        for (const order of orders) {
+          for (const item of order.items) {
+            const key = item.code + "__" + item.size;
+            if (!map[key]) {
+              map[key] = {
+                name: item.name,
+                code: item.code,
+                size: item.size,
+                totalQty: 0,
+                orderIds: [],
+              };
+            }
+            map[key].totalQty += item.qty;
+            if (!map[key].orderIds.includes(order.orderId))
+              map[key].orderIds.push(order.orderId);
+          }
+        }
+        return Object.values(map).sort((a, b) => {
+          const nameComparison = a.name.localeCompare(b.name, undefined, {
+            sensitivity: "base",
+          });
+          return nameComparison !== 0
+            ? nameComparison
+            : b.totalQty - a.totalQty;
+        });
+      }
+
+      // ── Render UI ──────────────────────────────────────────────────────────────
+      function render() {
+        const agg = getAggregated();
+        const totalItems = agg.reduce((s, i) => s + i.totalQty, 0);
+        const hasData = orders.length > 0;
+
+        document.getElementById("metrics").style.display = hasData
+          ? "grid"
+          : "none";
+        document.getElementById("m-orders").textContent = orders.length;
+        document.getElementById("m-products").textContent = agg.length;
+        document.getElementById("m-items").textContent = totalItems;
+
+        // Files list
+        const fc = document.getElementById("files-card");
+        fc.style.display = hasData ? "block" : "none";
+        document.getElementById("files-list").innerHTML = orders
+          .map(
+            (o) => `
     <div class="slip-row">
       <span class="slip-filename" title="${o.fileName}">${o.fileName}</span>
       <span class="slip-id">${o.orderId}</span>
       <span class="slip-name">${o.customerName}</span>
-      <span class="badge ${o.items.length === 0 ? 'warn' : ''}">${o.items.length} item${o.items.length !== 1 ? 's' : ''}</span>
+      <span class="badge ${o.items.length === 0 ? "warn" : ""}">${o.items.length} item${o.items.length !== 1 ? "s" : ""}</span>
       <button class="remove-btn" onclick="removeOrder('${o.orderId}')" aria-label="Remove ${o.orderId}">×</button>
     </div>
-  `).join('');
+  `,
+          )
+          .join("");
 
-  // Items list
-  const ic = document.getElementById('items-card');
-  ic.style.display = agg.length ? 'block' : 'none';
-  document.getElementById('items-count').textContent = agg.length + ' products';
-  const itemRows = [];
-  for (let i = 0; i < agg.length; i++) {
-    const item = agg[i];
-    itemRows.push(`
-      <div class="item-row">
-        <div class="qty-bubble">${item.totalQty}</div>
-        <div style="flex:1;min-width:0">
-          <div class="item-name">${item.name}</div>
-          <div class="item-sub">${item.orderIds.length} order${item.orderIds.length > 1 ? 's' : ''}: ${item.orderIds.join(' · ')}</div>
+        // Items list
+        const ic = document.getElementById("items-card");
+        ic.style.display = agg.length ? "block" : "none";
+        document.getElementById("items-count").textContent =
+          agg.length + " products";
+        const groups = [];
+        let currentGroup = null;
+        agg.forEach((item) => {
+          if (!currentGroup || currentGroup.name !== item.name) {
+            currentGroup = {
+              name: item.name,
+              totalQty: item.totalQty,
+              orderIds: [...item.orderIds],
+              children: [
+                {
+                  size: item.size,
+                  code: item.code,
+                  qty: item.totalQty,
+                },
+              ],
+            };
+            groups.push(currentGroup);
+          } else {
+            currentGroup.totalQty += item.totalQty;
+            item.orderIds.forEach((orderId) => {
+              if (!currentGroup.orderIds.includes(orderId)) {
+                currentGroup.orderIds.push(orderId);
+              }
+            });
+            currentGroup.children.push({
+              size: item.size,
+              code: item.code,
+              qty: item.totalQty,
+            });
+          }
+        });
+
+        const itemRows = [];
+        groups.forEach((group, index) => {
+          itemRows.push(`
+      <div class="item-group-parent">
+        <div>
+          <div class="item-name">${group.name}</div>
+          <div class="item-sub">${group.orderIds.length} order${group.orderIds.length > 1 ? "s" : ""}: ${group.orderIds.join(" · ")}</div>
         </div>
-        <span class="size-tag">${item.size}</span>
-        <span class="code-tag">${item.code}</span>
+        <div class="group-total">${group.totalQty} pcs</div>
       </div>
     `);
 
-    const next = agg[i + 1];
-    if (next && next.name !== item.name) {
-      itemRows.push('<div class="item-separator" aria-hidden="true"></div>');
-    }
-  }
-  document.getElementById('items-list').innerHTML = itemRows.join('');
+          group.children.forEach((child) => {
+            itemRows.push(`
+      <div class="item-row item-child-row">
+        <div class="qty-bubble">${child.qty}</div>
+        <div style="flex:1;min-width:0">
+          <div class="child-meta"><span>Size: ${child.size}</span><span>Code: ${child.code}</span></div>
+        </div>
+      </div>
+    `);
+          });
 
-  // Actions
-  document.getElementById('actions-row').style.display = agg.length ? 'flex' : 'none';
-}
+          if (index < groups.length - 1) {
+            itemRows.push(
+              '<div class="item-separator" aria-hidden="true"></div>',
+            );
+          }
+        });
 
-function removeOrder(id) {
-  orders = orders.filter(o => o.orderId !== id);
-  render();
-  if (!orders.length) setStatus('', '');
-}
+        document.getElementById("items-list").innerHTML = itemRows.join("");
 
-function clearAll() {
-  orders = [];
-  render();
-  setStatus('', '');
-}
-
-// ── PDF Generation: Worker Sheet ───────────────────────────────────────────
-function generateWorkerPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const agg = getAggregated();
-  const W = 210, M = 14;
-  const now = new Date().toLocaleDateString('en-GB');
-
-  // Header
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.text('BLACK PEGASUS', W / 2, 22, { align: 'center' });
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.text('Worker Preparation Sheet — Items to Pick & Pack', W / 2, 30, { align: 'center' });
-  doc.setFontSize(8);
-  doc.setTextColor(120);
-  doc.text(`Generated: ${now}   ·   Orders: ${orders.length}   ·   Total pieces: ${agg.reduce((s,i)=>s+i.totalQty,0)}`, W/2, 37, { align: 'center' });
-  doc.setTextColor(0);
-
-  // Divider
-  doc.setDrawColor(60); doc.setLineWidth(0.5);
-  doc.line(M, 41, W - M, 41);
-
-  // Column headers
-  let y = 49;
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(100);
-  doc.text('QTY',  M + 5, y, { align: 'center' });
-  doc.text('PRODUCT NAME', M + 22, y);
-  doc.text('SIZE',  M + 130, y);
-  doc.text('CODE',  M + 162, y);
-  doc.setTextColor(0);
-  y += 2;
-  doc.setDrawColor(180); doc.setLineWidth(0.3);
-  doc.line(M, y, W - M, y);
-  y += 7;
-
-  // Rows
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
-  for (let i = 0; i < agg.length; i++) {
-    const item = agg[i];
-    if (y > 272) {
-      doc.addPage();
-      y = 18;
-      // Repeat mini-header
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(100);
-      doc.text('QTY', M + 5, y, { align: 'center' });
-      doc.text('PRODUCT NAME', M + 22, y);
-      doc.text('SIZE', M + 130, y);
-      doc.text('CODE', M + 162, y);
-      doc.setTextColor(0);
-      y += 2; doc.setDrawColor(180);
-      doc.line(M, y, W - M, y);
-      y += 7;
-    }
-
-    // Alternate row shading
-    if (i % 2 === 0) {
-      doc.setFillColor(248, 248, 248);
-      doc.rect(M, y - 5, W - 2 * M, 9, 'F');
-    }
-
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
-    doc.text(String(item.totalQty), M + 5, y, { align: 'center' });
-
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
-    doc.text(item.name, M + 22, y);
-    doc.text(item.size, M + 130, y);
-
-    doc.setFont('courier', 'normal'); doc.setFontSize(9);
-    doc.text(item.code, M + 162, y);
-
-    y += 3;
-    doc.setDrawColor(220); doc.setLineWidth(0.2);
-    doc.line(M, y, W - M, y);
-    y += 7;
-  }
-
-  // Footer
-  doc.setFont('helvetica', 'italic'); doc.setFontSize(8); doc.setTextColor(160);
-  doc.text('Black Pegasus — Internal Use Only', W/2, 288, { align: 'center' });
-
-  doc.save(`BP_worker_sheet_${now.replace(/\//g, '-')}.pdf`);
-}
-
-// ── PDF Generation: Individual Slips ──────────────────────────────────────
-function generateIndividualPDFs() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const W = 210, M = 16;
-  const now = new Date().toLocaleDateString('en-GB');
-
-  orders.forEach((order, idx) => {
-    if (idx > 0) doc.addPage();
-
-    // Header
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(22);
-    doc.text('BLACK PEGASUS', W/2, 22, { align: 'center' });
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-    doc.text('Packing Slip (No Prices)', W/2, 30, { align: 'center' });
-    doc.setFontSize(8); doc.setTextColor(100);
-    doc.text(`Order ID: ${order.orderId}`, M, 38);
-    doc.text(`Generated: ${now}`, W - M, 38, { align: 'right' });
-    doc.setTextColor(0);
-
-    doc.setDrawColor(60); doc.setLineWidth(0.5);
-    doc.line(M, 42, W - M, 42);
-
-    // Customer info
-    let y = 52;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
-    doc.text('Customer Information', M, y);
-    y += 7;
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-
-    const fields = [
-      ['Name',    order.customerName],
-      ['Phone',   order.phone],
-      ['City',    order.city],
-      ['Notes',   order.notes],
-    ];
-    for (const [label, value] of fields) {
-      if (!value) continue;
-      doc.setFont('helvetica', 'bold');
-      doc.text(label + ':', M, y);
-      doc.setFont('helvetica', 'normal');
-      // Handle Arabic/RTL: if text contains Arabic, render right-aligned
-      const isAr = /[\u0600-\u06FF]/.test(value);
-      if (isAr) {
-        doc.text(value, W - M, y, { align: 'right' });
-      } else {
-        doc.text(value, M + 28, y);
+        // Actions
+        document.getElementById("actions-row").style.display = agg.length
+          ? "flex"
+          : "none";
       }
-      y += 7;
-    }
 
-    y += 2;
-    doc.setDrawColor(180); doc.setLineWidth(0.3);
-    doc.line(M, y, W - M, y);
-    y += 7;
-
-    // Table header
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(100);
-    doc.text('#',        M + 4,  y, { align: 'center' });
-    doc.text('Item Name', M + 14, y);
-    doc.text('Qty',      M + 112, y, { align: 'center' });
-    doc.text('Size',     M + 130, y);
-    doc.text('Code',     M + 162, y);
-    doc.setTextColor(0);
-    y += 2;
-    doc.setDrawColor(200);
-    doc.line(M, y, W - M, y);
-    y += 6;
-
-    // Items
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-    let totalQty = 0;
-    order.items.forEach((item, i) => {
-      if (y > 265) { doc.addPage(); y = 20; }
-      if (i % 2 === 0) {
-        doc.setFillColor(249, 249, 249);
-        doc.rect(M, y - 4.5, W - 2*M, 8, 'F');
+      function removeOrder(id) {
+        orders = orders.filter((o) => o.orderId !== id);
+        render();
+        if (!orders.length) setStatus("", "");
       }
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-      doc.text(String(i + 1), M + 4, y, { align: 'center' });
-      doc.text(item.name, M + 14, y);
-      doc.setFont('helvetica', 'bold');
-      doc.text(String(item.qty), M + 112, y, { align: 'center' });
-      doc.setFont('helvetica', 'normal');
-      doc.text(item.size, M + 130, y);
-      doc.setFont('courier', 'normal'); doc.setFontSize(9);
-      doc.text(item.code, M + 162, y);
-      totalQty += item.qty;
-      y += 2;
-      doc.setDrawColor(230); doc.setLineWidth(0.2);
-      doc.line(M, y, W - M, y);
-      y += 6;
-    });
 
-    // Total
-    y += 3;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
-    doc.text(`TOTAL:  ${order.items.length} line(s)   ${totalQty} piece(s)`, W - M, y, { align: 'right' });
+      function clearAll() {
+        orders = [];
+        render();
+        setStatus("", "");
+      }
 
-    // Footer
-    doc.setFont('helvetica', 'italic'); doc.setFontSize(8); doc.setTextColor(160);
-    doc.text('Black Pegasus — Thank you for your order!', W/2, 288, { align: 'center' });
-    doc.setTextColor(0);
-  });
+      // ── PDF Generation: Worker Sheet ───────────────────────────────────────────
+      function generateWorkerPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const agg = getAggregated();
+        const W = 210, M = 14, CONTENT_W = W - 2 * M;
+        const now = new Date().toLocaleDateString("en-GB");
+        const totalPcs = agg.reduce((s, i) => s + i.totalQty, 0);
 
-  doc.save(`BP_individual_slips_${now.replace(/\//g, '-')}.pdf`);
-}
-</script>
-</body>
+        // ── Column layout (x positions) ───────────────────────────────────────
+        // [ CHK | QTY | PRODUCT NAME ................... | SIZE | CODE ]
+        const COL_CHK  = M;                 // checkbox x  (4mm wide)
+        const COL_QTY  = M + 7;            // qty number  (12mm wide)
+        const COL_NAME = M + 20;           // product name start
+        const COL_SIZE = M + 120;          // size start  (30mm wide)
+        const COL_CODE = W - M - 2;        // code right-aligned
+        const FOOTER_Y = 279;
+        const ROW_H_PARENT = 11;           // parent row height
+        const ROW_H_CHILD  = 8;            // child row height
+        const CB = 3.5;                    // checkbox side length
+
+        // ── Helper: draw an empty checkbox ────────────────────────────────────
+        function drawCheckbox(x, centerY) {
+          doc.setDrawColor(80);
+          doc.setLineWidth(0.4);
+          doc.rect(x, centerY - CB / 2, CB, CB);
+        }
+
+        // ── Helper: draw page header ──────────────────────────────────────────
+        function drawPageHeader(pageNum) {
+          if (pageNum === 1) {
+            // Brand name
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.setTextColor(30);
+            doc.text("BLACK PEGASUS", M, 20);
+            // Title on same baseline right side
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.setTextColor(80);
+            doc.text("Worker Preparation Sheet", W - M, 20, { align: "right" });
+            // Sub-line
+            doc.setFontSize(7.5);
+            doc.text(
+              `Date: ${now}   ·   Orders: ${orders.length}   ·   Products: ${agg.length}   ·   Total pcs: ${totalPcs}`,
+              W - M, 25.5, { align: "right" }
+            );
+            doc.setTextColor(0);
+            // Full-width rule
+            doc.setDrawColor(30);
+            doc.setLineWidth(0.6);
+            doc.line(M, 28, W - M, 28);
+            return 36; // y after header
+          } else {
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(8);
+            doc.setTextColor(30);
+            doc.text("BLACK PEGASUS", M, 10);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(100);
+            doc.text(`Worker Sheet (cont.) — Page ${pageNum}`, W - M, 10, { align: "right" });
+            doc.setTextColor(0);
+            doc.setDrawColor(150);
+            doc.setLineWidth(0.3);
+            doc.line(M, 12.5, W - M, 12.5);
+            return 19;
+          }
+        }
+
+        // ── Helper: draw column header band ──────────────────────────────────
+        function drawColHeaders(y) {
+          doc.setFillColor(40, 40, 40);
+          doc.rect(M, y, CONTENT_W, 6.5, "F");
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7);
+          doc.setTextColor(255);
+          doc.text("✓",       COL_CHK + CB / 2,  y + 4.5, { align: "center" });
+          doc.text("QTY",     COL_QTY + 5,       y + 4.5, { align: "center" });
+          doc.text("PRODUCT NAME",               COL_NAME, y + 4.5);
+          doc.text("SIZE",                       COL_SIZE,  y + 4.5);
+          doc.text("CODE",    COL_CODE,           y + 4.5, { align: "right" });
+          doc.setTextColor(0);
+          return y + 6.5;
+        }
+
+        // ── Build groups ──────────────────────────────────────────────────────
+        const groups = [];
+        let currentGroup = null;
+        agg.forEach((item) => {
+          if (!currentGroup || currentGroup.name !== item.name) {
+            currentGroup = {
+              name: item.name,
+              totalQty: item.totalQty,
+              orderIds: [...item.orderIds],
+              children: [{ size: item.size, code: item.code, qty: item.totalQty }],
+            };
+            groups.push(currentGroup);
+          } else {
+            currentGroup.totalQty += item.totalQty;
+            item.orderIds.forEach((id) => {
+              if (!currentGroup.orderIds.includes(id)) currentGroup.orderIds.push(id);
+            });
+            currentGroup.children.push({ size: item.size, code: item.code, qty: item.totalQty });
+          }
+        });
+
+        // ── Start rendering ───────────────────────────────────────────────────
+        let pageNum = 1;
+        let y = drawPageHeader(pageNum);
+        y = drawColHeaders(y);
+        y += 1.5; // small top-pad before first row
+
+        groups.forEach((group, gIdx) => {
+          // Ensure parent + at least one child don't orphan
+          const spaceNeeded = ROW_H_PARENT + ROW_H_CHILD;
+          if (y + spaceNeeded > FOOTER_Y) {
+            doc.addPage();
+            pageNum++;
+            y = drawPageHeader(pageNum);
+            y = drawColHeaders(y);
+            y += 1.5;
+          }
+
+          // ── PARENT ROW ───────────────────────────────────────────────────
+          const pRowY = y;
+          const pMidY = pRowY + ROW_H_PARENT / 2;
+
+          // Light grey background
+          doc.setFillColor(232, 232, 232);
+          doc.rect(M, pRowY, CONTENT_W, ROW_H_PARENT, "F");
+
+          // Left accent stripe (dark, 2.5mm)
+          doc.setFillColor(40, 40, 40);
+          doc.rect(M, pRowY, 2.5, ROW_H_PARENT, "F");
+
+          // Bottom border for parent
+          doc.setDrawColor(190);
+          doc.setLineWidth(0.25);
+          doc.line(M, pRowY + ROW_H_PARENT, W - M, pRowY + ROW_H_PARENT);
+
+          // Checkbox (parent)
+          drawCheckbox(COL_CHK + 2.5 + 1, pMidY);
+
+          // QTY — large bold number
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(12);
+          doc.setTextColor(30);
+          doc.text(String(group.totalQty), COL_QTY + 5, pMidY + 4, { align: "center" });
+
+          // Vertical divider after QTY
+          doc.setDrawColor(180);
+          doc.setLineWidth(0.2);
+          doc.line(COL_NAME - 3, pRowY + 1.5, COL_NAME - 3, pRowY + ROW_H_PARENT - 1.5);
+
+          // Product name
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9.5);
+          doc.setTextColor(20);
+          doc.text(group.name, COL_NAME, pMidY + 3.2, { maxWidth: COL_SIZE - COL_NAME - 4 });
+
+          // Order count tag (right side, muted)
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(7);
+          doc.setTextColor(110);
+          const orderLabel = `${group.orderIds.length} order${group.orderIds.length > 1 ? "s" : ""}`;
+          doc.text(orderLabel, COL_CODE, pMidY + 3, { align: "right" });
+
+          doc.setTextColor(0);
+          y += ROW_H_PARENT;
+
+          // ── CHILD ROWS ───────────────────────────────────────────────────
+          group.children.forEach((child, cIdx) => {
+            if (y + ROW_H_CHILD > FOOTER_Y) {
+              doc.addPage();
+              pageNum++;
+              y = drawPageHeader(pageNum);
+              y = drawColHeaders(y);
+              y += 1.5;
+            }
+
+            const cRowY = y;
+            const cMidY = cRowY + ROW_H_CHILD / 2;
+
+            // Alternating background
+            if (cIdx % 2 === 0) {
+              doc.setFillColor(252, 252, 252);
+            } else {
+              doc.setFillColor(245, 245, 245);
+            }
+            doc.rect(M, cRowY, CONTENT_W, ROW_H_CHILD, "F");
+
+            // Indent bar (grey, thinner)
+            doc.setFillColor(180, 180, 180);
+            doc.rect(M, cRowY, 2.5, ROW_H_CHILD, "F");
+
+            // Bottom border
+            doc.setDrawColor(210);
+            doc.setLineWidth(0.2);
+            doc.line(M, cRowY + ROW_H_CHILD, W - M, cRowY + ROW_H_CHILD);
+
+            // Checkbox (child) — slightly indented
+            drawCheckbox(COL_CHK + 2.5 + 1, cMidY);
+
+            // QTY
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(50);
+            doc.text(String(child.qty), COL_QTY + 5, cMidY + 3, { align: "center" });
+
+            // Vertical divider
+            doc.setDrawColor(200);
+            doc.setLineWidth(0.15);
+            doc.line(COL_NAME - 3, cRowY + 1.5, COL_NAME - 3, cRowY + ROW_H_CHILD - 1.5);
+
+            // Size — indented label + value
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(7.5);
+            doc.setTextColor(110);
+            doc.text("Size:", COL_NAME + 4, cMidY + 2.5);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(30);
+            doc.text(child.size, COL_NAME + 16, cMidY + 2.5);
+
+            // Vertical divider before code
+            doc.setDrawColor(200);
+            doc.line(COL_SIZE - 2, cRowY + 1.5, COL_SIZE - 2, cRowY + ROW_H_CHILD - 1.5);
+
+            // Code
+            doc.setFont("courier", "bold");
+            doc.setFontSize(7.5);
+            doc.setTextColor(60);
+            doc.text(child.code, COL_CODE, cMidY + 2.5, { align: "right" });
+
+            doc.setTextColor(0);
+            y += ROW_H_CHILD;
+          });
+
+          // Gap between groups
+          y += 4;
+        });
+
+        // ── Footer ────────────────────────────────────────────────────────────
+        doc.setDrawColor(120);
+        doc.setLineWidth(0.3);
+        doc.line(M, 284, W - M, 284);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(140);
+        doc.text("Black Pegasus — Internal Use Only", M, 288);
+        doc.text(`Page ${pageNum} of ${pageNum}`, W - M, 288, { align: "right" });
+
+        doc.save(`BP_worker_sheet_${now.replace(/\//g, "-")}.pdf`);
+      }
+
+      // ── PDF Generation: Individual Slips ──────────────────────────────────────
+      function generateIndividualPDFs() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+          orientation: "portrait",
+          unit: "mm",
+          format: "a4",
+        });
+        const W = 210,
+          M = 16;
+        const now = new Date().toLocaleDateString("en-GB");
+
+        orders.forEach((order, idx) => {
+          if (idx > 0) doc.addPage();
+
+          // Header
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(22);
+          doc.text("BLACK PEGASUS", W / 2, 22, { align: "center" });
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.text("Packing Slip (No Prices)", W / 2, 30, { align: "center" });
+          doc.setFontSize(8);
+          doc.setTextColor(100);
+          doc.text(`Order ID: ${order.orderId}`, M, 38);
+          doc.text(`Generated: ${now}`, W - M, 38, { align: "right" });
+          doc.setTextColor(0);
+
+          doc.setDrawColor(60);
+          doc.setLineWidth(0.5);
+          doc.line(M, 42, W - M, 42);
+
+          // Customer info
+          let y = 52;
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.text("Customer Information", M, y);
+          y += 7;
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+
+          const fields = [
+            ["Name", order.customerName],
+            ["Phone", order.phone],
+            ["City", order.city],
+            ["Notes", order.notes],
+          ];
+          for (const [label, value] of fields) {
+            if (!value) continue;
+            doc.setFont("helvetica", "bold");
+            doc.text(label + ":", M, y);
+            doc.setFont("helvetica", "normal");
+            // Handle Arabic/RTL: if text contains Arabic, render right-aligned
+            const isAr = /[\u0600-\u06FF]/.test(value);
+            if (isAr) {
+              doc.text(value, W - M, y, { align: "right" });
+            } else {
+              doc.text(value, M + 28, y);
+            }
+            y += 7;
+          }
+
+          y += 2;
+          doc.setDrawColor(180);
+          doc.setLineWidth(0.3);
+          doc.line(M, y, W - M, y);
+          y += 7;
+
+          // Table header
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(8);
+          doc.setTextColor(100);
+          doc.text("#", M + 4, y, { align: "center" });
+          doc.text("Item Name", M + 14, y);
+          doc.text("Qty", M + 112, y, { align: "center" });
+          doc.text("Size", M + 130, y);
+          doc.text("Code", M + 162, y);
+          doc.setTextColor(0);
+          y += 2;
+          doc.setDrawColor(200);
+          doc.line(M, y, W - M, y);
+          y += 6;
+
+          // Items
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          let totalQty = 0;
+          order.items.forEach((item, i) => {
+            if (y > 265) {
+              doc.addPage();
+              y = 20;
+            }
+            if (i % 2 === 0) {
+              doc.setFillColor(249, 249, 249);
+              doc.rect(M, y - 4.5, W - 2 * M, 8, "F");
+            }
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(String(i + 1), M + 4, y, { align: "center" });
+            doc.text(item.name, M + 14, y);
+            doc.setFont("helvetica", "bold");
+            doc.text(String(item.qty), M + 112, y, { align: "center" });
+            doc.setFont("helvetica", "normal");
+            doc.text(item.size, M + 130, y);
+            doc.setFont("courier", "normal");
+            doc.setFontSize(9);
+            doc.text(item.code, M + 162, y);
+            totalQty += item.qty;
+            y += 2;
+            doc.setDrawColor(230);
+            doc.setLineWidth(0.2);
+            doc.line(M, y, W - M, y);
+            y += 6;
+          });
+
+          // Total
+          y += 3;
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.text(
+            `TOTAL:  ${order.items.length} line(s)   ${totalQty} piece(s)`,
+            W - M,
+            y,
+            { align: "right" },
+          );
+
+          // Footer
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(8);
+          doc.setTextColor(160);
+          doc.text("Black Pegasus — Thank you for your order!", W / 2, 288, {
+            align: "center",
+          });
+          doc.setTextColor(0);
+        });
+
+        doc.save(`BP_individual_slips_${now.replace(/\//g, "-")}.pdf`);
+      }
+    </script>
+  </body>
 </html>
