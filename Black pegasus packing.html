@@ -155,10 +155,14 @@
     align-items: center;
     gap: 12px;
     padding: 11px 16px;
-    border-bottom: 1px solid var(--border);
     font-size: 14px;
   }
-  .item-row:last-child { border-bottom: none; }
+  .item-row + .item-separator { margin-top: 0; }
+  .item-separator {
+    height: 1px;
+    background: var(--border-strong);
+    margin: 0 16px 8px;
+  }
   .qty-bubble {
     min-width: 40px; height: 40px;
     border-radius: 50%;
@@ -621,17 +625,27 @@ function render() {
   const ic = document.getElementById('items-card');
   ic.style.display = agg.length ? 'block' : 'none';
   document.getElementById('items-count').textContent = agg.length + ' products';
-  document.getElementById('items-list').innerHTML = agg.map(item => `
-    <div class="item-row">
-      <div class="qty-bubble">${item.totalQty}</div>
-      <div style="flex:1;min-width:0">
-        <div class="item-name">${item.name}</div>
-        <div class="item-sub">${item.orderIds.length} order${item.orderIds.length > 1 ? 's' : ''}: ${item.orderIds.join(' · ')}</div>
+  const itemRows = [];
+  for (let i = 0; i < agg.length; i++) {
+    const item = agg[i];
+    itemRows.push(`
+      <div class="item-row">
+        <div class="qty-bubble">${item.totalQty}</div>
+        <div style="flex:1;min-width:0">
+          <div class="item-name">${item.name}</div>
+          <div class="item-sub">${item.orderIds.length} order${item.orderIds.length > 1 ? 's' : ''}: ${item.orderIds.join(' · ')}</div>
+        </div>
+        <span class="size-tag">${item.size}</span>
+        <span class="code-tag">${item.code}</span>
       </div>
-      <span class="size-tag">${item.size}</span>
-      <span class="code-tag">${item.code}</span>
-    </div>
-  `).join('');
+    `);
+
+    const next = agg[i + 1];
+    if (next && next.name !== item.name) {
+      itemRows.push('<div class="item-separator" aria-hidden="true"></div>');
+    }
+  }
+  document.getElementById('items-list').innerHTML = itemRows.join('');
 
   // Actions
   document.getElementById('actions-row').style.display = agg.length ? 'flex' : 'none';
