@@ -1075,19 +1075,47 @@
           }
         }
 
+        // ── Size → colour map (soft pastels, printer-friendly) ────────────────
+        const SIZE_PALETTE = [
+          [255, 235, 180], // warm amber
+          [200, 235, 255], // sky blue
+          [210, 255, 210], // mint green
+          [255, 210, 230], // rose pink
+          [230, 215, 255], // soft lavender
+          [255, 230, 200], // peach
+          [200, 245, 240], // aqua teal
+          [245, 245, 195], // lemon yellow
+          [255, 215, 200], // salmon
+          [215, 240, 215], // sage green
+          [235, 210, 255], // lilac
+          [200, 225, 255], // cornflower
+        ];
+        const allSizes = [];
+        agg.forEach((item) => {
+          if (!allSizes.includes(item.size)) allSizes.push(item.size);
+        });
+        function sizeColor(size) {
+          const idx = allSizes.indexOf(size) % SIZE_PALETTE.length;
+          return SIZE_PALETTE[idx];
+        }
+
         // ── Helper: draw column header band ──────────────────────────────────
         function drawColHeaders(y) {
-          doc.setFillColor(40, 40, 40);
-          doc.rect(M, y, CONTENT_W, 6.5, "F");
+          // No filled background — border lines only (ink-saving)
+          doc.setDrawColor(100);
+          doc.setLineWidth(0.5);
+          doc.line(M, y, W - M, y);
           doc.setFont("helvetica", "bold");
-          doc.setFontSize(7);
-          doc.setTextColor(255);
-          doc.text("✓",       COL_CHK + CB / 2,  y + 4.5, { align: "center" });
-          doc.text("QTY",     COL_QTY + 5,       y + 4.5, { align: "center" });
-          doc.text("PRODUCT NAME",               COL_NAME, y + 4.5);
-          doc.text("SIZE",                       COL_SIZE,  y + 4.5);
-          doc.text("CODE",    COL_CODE,           y + 4.5, { align: "right" });
+          doc.setFontSize(7.5);
+          doc.setTextColor(60);
+          doc.text("✓",            COL_CHK + CB / 2,  y + 5, { align: "center" });
+          doc.text("QTY",          COL_QTY + 5,       y + 5, { align: "center" });
+          doc.text("PRODUCT NAME", COL_NAME,           y + 5);
+          doc.text("SIZE",         COL_SIZE,           y + 5);
+          doc.text("CODE",         COL_CODE,           y + 5, { align: "right" });
           doc.setTextColor(0);
+          doc.setLineWidth(0.4);
+          doc.line(M, y + 6.5, W - M, y + 6.5);
           return y + 6.5;
         }
 
@@ -1189,16 +1217,13 @@
             const cRowY = y;
             const cMidY = cRowY + ROW_H_CHILD / 2;
 
-            // Alternating background
-            if (cIdx % 2 === 0) {
-              doc.setFillColor(252, 252, 252);
-            } else {
-              doc.setFillColor(245, 245, 245);
-            }
+            // Size-based pastel background (same size = same colour across whole doc)
+            const [sr, sg, sb] = sizeColor(child.size);
+            doc.setFillColor(sr, sg, sb);
             doc.rect(M, cRowY, CONTENT_W, ROW_H_CHILD, "F");
 
-            // Indent bar (grey, thinner)
-            doc.setFillColor(180, 180, 180);
+            // Indent bar — slightly deeper tint of same colour
+            doc.setFillColor(Math.max(0, sr - 45), Math.max(0, sg - 45), Math.max(0, sb - 45));
             doc.rect(M, cRowY, 2.5, ROW_H_CHILD, "F");
 
             // Bottom border
