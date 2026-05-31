@@ -587,7 +587,10 @@ function getAggregated() {
       if (!map[key].orderIds.includes(order.orderId)) map[key].orderIds.push(order.orderId);
     }
   }
-  return Object.values(map).sort((a, b) => b.totalQty - a.totalQty);
+  return Object.values(map).sort((a, b) => {
+    const nameComparison = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    return nameComparison !== 0 ? nameComparison : b.totalQty - a.totalQty;
+  });
 }
 
 // ── Render UI ──────────────────────────────────────────────────────────────
