@@ -296,22 +296,22 @@
 
         // ── Header ──────────────────────────────────────────────────────────
         doc.setTextColor(30, 30, 30);
-        doc.setFontSize(16);
+        doc.setFontSize(18);
         doc.setFont("helvetica", "bold");
-        doc.text("BLACK PEGASUS", pageW / 2, 10, { align: "center" });
-        doc.setFontSize(9);
+        doc.text("BLACK PEGASUS", pageW / 2, 12, { align: "center" });
+        doc.setFontSize(12);
         doc.setFont("helvetica", "normal");
         doc.text(
           withPrices ? "Customer Invoice" : "Packing Slip",
           pageW / 2,
-          17,
+          20,
           { align: "center" },
         );
         y = 28;
 
         // ── Meta ────────────────────────────────────────────────────────────
         doc.setTextColor(80, 80, 80);
-        doc.setFontSize(8);
+        doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         doc.text("Order ID: " + orderID, margin, y);
         doc.text("Generated: " + generateTimestamp(), pageW - margin, y, {
@@ -323,7 +323,7 @@
         y += 6;
 
         // ── Customer Info ────────────────────────────────────────────────────
-        doc.setFontSize(10);
+        doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(30, 30, 30);
         doc.text("Customer Information", margin, y);
@@ -338,22 +338,22 @@
         ];
 
         infoRows.forEach(([label, value]) => {
-          doc.setFontSize(9);
+          doc.setFontSize(11);
           doc.setFont("helvetica", "bold");
           doc.setTextColor(80, 80, 80);
           doc.text(label + ":", margin, y);
 
           const displayVal = hasArabic(value) ? reshapeArabic(value) : value;
           setFont(doc, value, false);
-          doc.setFontSize(9);
+          doc.setFontSize(11);
           doc.setTextColor(30, 30, 30);
 
           if (hasArabic(value)) {
             doc.text(displayVal, pageW - margin, y, { align: "right" });
           } else {
-            doc.text(displayVal, margin + 24, y);
+            doc.text(displayVal, margin + 30, y);
           }
-          y += 6;
+          y += 7;
         });
 
         y += 2;
@@ -363,7 +363,7 @@
 
         // ── Items table ──────────────────────────────────────────────────────
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(10);
+        doc.setFontSize(12);
         doc.setTextColor(30, 30, 30);
         doc.text("Order Items", margin, y);
         y += 4;
@@ -418,14 +418,14 @@
           body: body,
           margin: { left: margin, right: margin },
           styles: {
-            fontSize: 8,
-            cellPadding: 2,
+            fontSize: 10,
+            cellPadding: 4,
             halign: "center",
             valign: "middle",
             textColor: [0, 0, 0],
             fontStyle: "bold",
             lineColor: [0, 0, 0],
-            lineWidth: 0.2,
+            lineWidth: 0.3,
           },
           headStyles: {
             fillColor: [200, 200, 200],
@@ -468,7 +468,7 @@
           }
 
           doc.setFont("helvetica", "normal");
-          doc.setFontSize(9);
+          doc.setFontSize(11);
           doc.setTextColor(50, 50, 50);
 
           [
@@ -484,30 +484,30 @@
           y += 2;
           doc.setFillColor(76, 175, 80);
           doc.setDrawColor(46, 125, 50);
-          doc.roundedRect(margin, y, pageW - margin * 2, 10, 2, 2, "FD");
+          doc.roundedRect(margin, y, pageW - margin * 2, 14, 3, 3, "FD");
           doc.setTextColor(255, 255, 255);
           doc.setFont("helvetica", "bold");
-          doc.setFontSize(11);
+          doc.setFontSize(14);
           doc.text(
             "Grand Total: " + grandTotal.toFixed(2) + " EGP",
             pageW / 2,
-            y + 6.5,
+            y + 9,
             { align: "center" },
           );
-          y += 14;
+          y += 18;
         }
 
         // ── Footer ───────────────────────────────────────────────────────────
         const pageCount = doc.internal.getNumberOfPages();
         for (let p = 1; p <= pageCount; p++) {
           doc.setPage(p);
-          doc.setFontSize(7);
+          doc.setFontSize(8);
           doc.setFont("helvetica", "normal");
-          doc.setTextColor(160, 160, 160);
+          doc.setTextColor(120, 120, 120);
           doc.text(
             "Black Pegasus — Thank you for your order!",
             pageW / 2,
-            doc.internal.pageSize.getHeight() - 6,
+            doc.internal.pageSize.getHeight() - 8,
             { align: "center" },
           );
         }
