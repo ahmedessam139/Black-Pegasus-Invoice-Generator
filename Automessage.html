@@ -322,12 +322,12 @@
         doc.line(margin, y, pageW - margin, y);
         y += 6;
 
-        // ── Customer Info ────────────────────────────────────────────────────
+        // ── Customer Info (small table) ───────────────────────────────────────
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(30, 30, 30);
         doc.text("Customer Information", margin, y);
-        y += 6;
+        y += 2;
 
         const infoRows = [
           ["Name", customerInfo.name || "—"],
@@ -337,28 +337,66 @@
           ["Notes", customerInfo.notes || "—"],
         ];
 
-        infoRows.forEach(([label, value]) => {
-          doc.setFontSize(11);
-          doc.setFont("helvetica", "bold");
-          doc.setTextColor(80, 80, 80);
-          doc.text(label + ":", margin, y);
-
-          const displayVal = hasArabic(value) ? reshapeArabic(value) : value;
-          setFont(doc, value, false);
-          doc.setFontSize(11);
-          doc.setTextColor(30, 30, 30);
-
-          if (hasArabic(value)) {
-            doc.text(displayVal, pageW - margin, y, { align: "right" });
-          } else {
-            doc.text(displayVal, margin + 30, y);
-          }
-          y += 7;
+        // Render as a compact two-column table with minimal vertical padding
+        doc.autoTable({
+          startY: y,
+          head: [["Field", "Value"]],
+          body: infoRows.map(([l, v]) => [l, v || "—"]),
+          margin: { left: margin, right: margin },
+          styles: {
+            fontSize: 8,
+            cellPadding: 1,
+            minCellHeight: 0,
+            halign: "left",
+            valign: "middle",
+            textColor: [30, 30, 30],
+          },
+          headStyles: {
+            fillColor: [230, 230, 230],
+            textColor: [0, 0, 0],
+            fontStyle: "bold",
+            fontSize: 8,
+          },
+          theme: "grid",
+          didParseCell: function (data) {
+            // Value column: handle Arabic and right-align when needed
+            if (data.column.index === 1 && data.section === "body") {
+              const raw = String(data.cell.raw || "");
+              if (hasArabic(raw)) {
+                data.cell.styles.font = "Amiri";
+                data.cell.styles.halign = "right";
+                // reshape Arabic text for visual order
+                data.cell.text = [reshapeArabic(raw)];
+              }
+            }
+            // Make field column slightly bolder
+            if (data.column.index === 0 && data.section === "body") {
+              data.cell.styles.fontStyle = "bold";
+            }
+          },
+          columnStyles: {
+            0: { cellWidth: 28 },
+            1: { cellWidth: pageW - margin * 2 - 28 },
+          },
         });
 
-        y += 2;
-        doc.setDrawColor(200, 200, 200);
+        y = doc.lastAutoTable.finalY + 2;
+
+        // Draw a dashed separator and add a small space before items
+        doc.setDrawColor(180, 180, 180);
+        if (doc.setLineDash) {
+          doc.setLineDash([2, 2], 0);
+        } else if (doc.setDash) {
+          doc.setDash(2, 2);
+        }
+        doc.setLineWidth(0.3);
         doc.line(margin, y, pageW - margin, y);
+        // reset dash to solid
+        if (doc.setLineDash) {
+          doc.setLineDash([]);
+        } else if (doc.setDash) {
+          doc.setDash(0, 0);
+        }
         y += 6;
 
         // ── Items table ──────────────────────────────────────────────────────
