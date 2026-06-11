@@ -359,14 +359,16 @@
           },
           theme: "grid",
           didParseCell: function (data) {
-            // Value column: handle Arabic and right-align when needed
+            // Value column: handle Arabic, multiline and right-align when needed
             if (data.column.index === 1 && data.section === "body") {
               const raw = String(data.cell.raw || "");
               if (hasArabic(raw)) {
                 data.cell.styles.font = "Amiri";
                 data.cell.styles.halign = "right";
-                // reshape Arabic text for visual order
-                data.cell.text = [reshapeArabic(raw)];
+                const reshaped = reshapeArabic(raw);
+                data.cell.text = reshaped.split(/\r?\n/);
+              } else if (raw.indexOf("\n") !== -1) {
+                data.cell.text = raw.split(/\r?\n/);
               }
             }
             // Make field column slightly bolder
@@ -665,17 +667,51 @@
       }
 
       function extractCustomerInfo(message) {
-        const patterns = {
-          name: /Name:\s*(.*?)\n/,
-          phone: /Phone:\s*(.*?)\n/,
-          address: /Address:\s*([\s\S]*?)\s*City:/,
-          city: /City:\s*(.*?)\n/,
-          notes: /Notes:\s*(.*)/,
-        };
-        const info = {};
-        for (const [key, pattern] of Object.entries(patterns)) {
-          const m = message.match(pattern);
-          if (m) info[key] = m[1].trim();
+        const info = { name: "", phone: "", address: "", city: "", notes: "" };
+        if (!message) return info;
+
+        const lines = message.split(/\r?\n/);
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (/^Name:/i.test(line)) {
+            info.name = line.replace(/^Name:\s*/i, "").trim();
+            continue;
+          }
+          if (/^Phone:/i.test(line)) {
+            info.phone = line.replace(/^Phone:\s*/i, "").trim();
+            continue;
+          }
+          if (/^Address:/i.test(line)) {
+            let addr = line.replace(/^Address:\s*/i, "").trim();
+            let j = i + 1;
+            // Collect following lines until next known label or item line
+            while (
+              j < lines.length &&
+              !/^(Name:|Phone:|City:|Notes:|\d+x\s)/i.test(lines[j].trim())
+            ) {
+              if (lines[j].trim() !== "") {
+                addr += (addr ? "\n" : "") + lines[j].trim();
+              }
+              j++;
+            }
+            info.address = addr.trim();
+            i = j - 1;
+            continue;
+          }
+          if (/^City:/i.test(line)) {
+            info.city = line.replace(/^City:\s*/i, "").trim();
+            continue;
+          }
+          if (/^Notes:/i.test(line)) {
+            let notes = line.replace(/^Notes:\s*/i, "").trim();
+            let j = i + 1;
+            while (j < lines.length) {
+              notes += "\n" + lines[j];
+              j++;
+            }
+            info.notes = notes.trim();
+            break;
+          }
         }
         return info;
       }
