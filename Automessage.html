@@ -606,10 +606,11 @@
           <td><strong>${totalSizes}ml</strong></td><td>--</td><td><strong>${totalPrice.toFixed(2)}</strong></td><td>--</td></tr>`;
         tableHTML += "</table>";
 
-        const shippingOptions = Array.from(
-          { length: 30 },
-          (_, i) => (i + 1) * 10,
-        )
+        const shippingOptions = [
+          0,
+          ...Array.from({ length: 60 }, (_, i) => (i + 1) * 10),
+          
+        ]
           .map((f) => `<option value="${f}">${f} EGP</option>`)
           .join("");
         const deliveryOptions = Array.from({ length: 15 }, (_, i) => i + 1)
@@ -768,10 +769,11 @@
           <td><strong>${totalSizes}ml</strong></td><td>--</td><td><strong>${totalPrice.toFixed(2)}</strong></td><td>--</td></tr>`;
         tableHTML += "</table>";
 
-        const shippingOptions = Array.from(
-          { length: 30 },
-          (_, i) => (i + 1) * 10,
-        )
+        const shippingOptions = [
+          0,
+          ...Array.from({ length: 60 }, (_, i) => (i + 1) * 10),
+         
+        ]
           .map((f) => `<option value="${f}">${f} EGP</option>`)
           .join("");
         const deliveryOptions = Array.from({ length: 15 }, (_, i) => i + 1)
