@@ -149,6 +149,22 @@
           Sort by Size
         </button>
       </div>
+      <div
+        style="margin: 10px 0; display: flex; align-items: center; gap: 10px"
+      >
+        <label for="customerInfoFontSize"
+          ><strong>Customer Info Font Size:</strong></label
+        >
+        <select id="customerInfoFontSize" style="width: auto; padding: 8px">
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="12" selected>12</option>
+          <option value="14">14</option>
+          <option value="16">16</option>
+        </select>
+      </div>
       <div id="output" class="output">
         <h2></h2>
         <img
@@ -266,6 +282,11 @@
         }
       }
 
+      function getCustomerInfoFontSize() {
+        const select = document.getElementById("customerInfoFontSize");
+        return select ? parseInt(select.value, 10) || 10 : 10;
+      }
+
       // ── PDF generation ───────────────────────────────────────────────────────
       function downloadPDF(withPrices) {
         if (!orderID) {
@@ -336,6 +357,7 @@
           ["City", customerInfo.city || "—"],
           ["Notes", customerInfo.notes || "—"],
         ];
+        const customerInfoFontSize = getCustomerInfoFontSize();
 
         // Render as a compact two-column table with minimal vertical padding
         doc.autoTable({
@@ -344,7 +366,7 @@
           body: infoRows.map(([l, v]) => [l, v || "—"]),
           margin: { left: margin, right: margin },
           styles: {
-            fontSize: 8,
+            fontSize: customerInfoFontSize,
             cellPadding: 1,
             minCellHeight: 0,
             halign: "left",
@@ -355,7 +377,7 @@
             fillColor: [230, 230, 230],
             textColor: [0, 0, 0],
             fontStyle: "bold",
-            fontSize: 8,
+            fontSize: customerInfoFontSize,
           },
           theme: "grid",
           didParseCell: function (data) {
@@ -609,7 +631,6 @@
         const shippingOptions = [
           0,
           ...Array.from({ length: 60 }, (_, i) => (i + 1) * 10),
-          
         ]
           .map((f) => `<option value="${f}">${f} EGP</option>`)
           .join("");
@@ -772,7 +793,6 @@
         const shippingOptions = [
           0,
           ...Array.from({ length: 60 }, (_, i) => (i + 1) * 10),
-         
         ]
           .map((f) => `<option value="${f}">${f} EGP</option>`)
           .join("");
